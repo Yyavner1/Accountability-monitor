@@ -93,6 +93,16 @@ class Emailer:
         )
         return self._send(msg)
 
+    def send_filter_tampered(self) -> bool:
+        msg = EmailMessage()
+        msg["Subject"] = "Accountability monitor: website filter was removed"
+        msg.set_content(
+            "The system-wide website filter is no longer present in the hosts "
+            "file. It may have been edited or removed. Blocked sites can load "
+            "again until it is restored."
+        )
+        return self._send(msg)
+
     def send_heartbeat_warning(self) -> bool:
         """Sent by an external watchdog, not the agent itself."""
         msg = EmailMessage()

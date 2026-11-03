@@ -22,6 +22,8 @@
 
   "healthcheck_url": "",
 
+  "watch_site_filter": true,
+
   "server_url": "",
   "device_api_key": ""
 }

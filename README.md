@@ -49,6 +49,30 @@ and control, and you choose who receives the reports.
   `capture_failure_threshold` consecutive bad captures. An idle machine keeps
   pinging normally, so an unattended computer does not raise a false alarm.
 
+## Blocking (proactive)
+
+Detection above is after-the-fact. Two optional layers block content before
+or as it appears. No layer is perfect; together they block most of it and the
+screenshot monitor remains the backstop for the rest.
+
+- **Website filter** ([`blocklist.txt`](blocklist.txt), `blocker.py`): writes
+  known adult domains into the system hosts file so they never load in any
+  browser or app. Apply it with admin rights:
+
+  ```bash
+  sudo ./install_filter.sh                 # macOS / Linux
+  # Windows (elevated): .\install_filter.ps1
+  ```
+
+  Pass a URL to pull a large maintained list (e.g. StevenBlack's hosts). With
+  `watch_site_filter` enabled, the agent alerts the partner if the filter is
+  later removed. The filter can be bypassed by an admin or by browser
+  DNS-over-HTTPS, which is why tampering is reported.
+
+- **Browser extension** ([`extension/`](extension/)): blurs explicit images
+  and video frames on-device as pages render, catching content on sites that
+  aren't blocked outright. See [`extension/README.md`](extension/README.md).
+
 ## Install
 
 ```bash
@@ -89,6 +113,7 @@ See [`config.example.json`](config.example.json). Key fields:
 | `alert_cooldown_seconds` | minimum gap between alert emails |
 | `capture_failure_threshold` | blank/failed captures in a row before a tamper email |
 | `healthcheck_url` | healthchecks.io ping URL (tamper alert) |
+| `watch_site_filter` | alert the partner if the website filter is removed |
 
 ## Run manually (for testing)
 
@@ -112,6 +137,7 @@ python3 -m accountability_monitor.monitor --config /path/to/config.json --once -
 
 ## Roadmap
 
-- Hosted backend + partner dashboard (the SaaS direction).
+- Deploy the backend (HTTPS, Postgres), invite emails, billing.
+- Self-healing website filter (privileged helper re-applies if removed).
 - Optional cloud second-opinion classifier for borderline captures.
 - Android companion app.

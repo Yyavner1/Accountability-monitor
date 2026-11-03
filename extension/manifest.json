@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Accountability Image Filter",
+  "version": "0.1.0",
+  "description": "Blurs explicit images and video frames on web pages, on-device.",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lib/tf.min.js", "lib/nsfwjs.min.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_title": "Accountability Image Filter",
+    "default_popup": "popup.html"
+  }
+}

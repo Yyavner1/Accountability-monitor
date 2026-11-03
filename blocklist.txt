@@ -1,0 +1,35 @@
+# Accountability Monitor website blocklist.
+# One domain per line. '#' starts a comment. 'www.' variants are added
+# automatically. This is a seed list of well-known adult sites; for broad
+# coverage, replace or extend it with a maintained category list such as
+# StevenBlack's hosts "porn" extension:
+#   https://github.com/StevenBlack/hosts  (fakenews-gambling-porn variants)
+# The installer can also fetch a list from a URL (see install_filter.sh).
+
+pornhub.com
+xvideos.com
+xnxx.com
+xhamster.com
+redtube.com
+youporn.com
+tube8.com
+spankbang.com
+onlyfans.com
+chaturbate.com
+livejasmin.com
+stripchat.com
+brazzers.com
+bangbros.com
+naughtyamerica.com
+realitykings.com
+porn.com
+porhub.com
+sex.com
+adultfriendfinder.com
+clips4sale.com
+manyvids.com
+fansly.com
+rule34.xxx
+e-hentai.org
+nhentai.net
+hentaihaven.xxx

@@ -22,7 +22,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-from . import capture, storage
+from . import blocker, capture, storage
 from .classifier import Classifier
 from .emailer import Emailer
 from .reporter import Reporter
@@ -81,10 +81,13 @@ class Monitor:
         self.capture_failure_threshold = int(
             cfg.get("capture_failure_threshold", 3)
         )
+        self.watch_site_filter = bool(cfg.get("watch_site_filter", False))
         self._last_alert = 0.0
         self._last_summary_day = None
         self._capture_failures = 0
         self._last_capture_fail_alert = 0.0
+        self._filter_ok = True
+        self._last_filter_alert = 0.0
 
     def _handle_flagged(self, shot: Path, reasons: list[str]) -> Path:
         kept: Path = shot
@@ -142,8 +145,28 @@ class Monitor:
                 None,
             )
 
+    def _check_site_filter(self) -> None:
+        if not self.watch_site_filter:
+            return
+        intact = blocker.block_is_intact()
+        if intact:
+            self._filter_ok = True
+            return
+        # Alert on the transition to broken, then at most once per cooldown.
+        now = time.time()
+        if self._filter_ok or now - self._last_filter_alert >= self.alert_cooldown:
+            log.warning("site filter missing/tampered")
+            if self.emailer.send_filter_tampered():
+                self._last_filter_alert = now
+            self.reporter.report_event(
+                "filter_tampered", ["website filter removed from hosts file"],
+                0.0, None,
+            )
+        self._filter_ok = False
+
     def tick(self) -> None:
         self._maybe_summary()
+        self._check_site_filter()
 
         # An idle machine is healthy and correctly not capturing, so keep the
         # heartbeat alive to avoid false tamper alerts (e.g. overnight).
