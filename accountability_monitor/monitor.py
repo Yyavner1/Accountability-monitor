@@ -148,7 +148,6 @@ class Monitor:
                 "capture_failure",
                 [f"{self._capture_failures} consecutive blank/failed captures"],
                 0.0,
-                None,
             )
 
     def _check_site_filter(self) -> None:
@@ -166,7 +165,7 @@ class Monitor:
                 self._last_filter_alert = now
             self.reporter.report_event(
                 "filter_tampered", ["website filter removed from hosts file"],
-                0.0, None,
+                0.0,
             )
         self._filter_ok = False
 
@@ -194,8 +193,9 @@ class Monitor:
         verdict = self.classifier.classify(str(shot))
         if verdict.flagged:
             kept = self._handle_flagged(shot, verdict.reasons)
+            # Report text metadata only — never the image — to the backend.
             self.reporter.report_event(
-                "flagged", verdict.reasons, verdict.top_score, kept
+                "flagged", verdict.reasons, verdict.top_score
             )
         else:
             self._handle_clean(shot)

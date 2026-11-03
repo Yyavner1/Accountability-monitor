@@ -5,6 +5,10 @@ reports flagged events, capture failures, and heartbeats to the backend, so
 a partner can view them in the dashboard. Email still works independently; a
 backend is additive, not required.
 
+IMPORTANT: only text metadata is sent to the backend — never a screenshot.
+Images stay on this device; any visual the partner sees is emailed to them
+directly (see emailer.py), not routed through the server.
+
 Uses only the standard library (urllib) to avoid adding a dependency.
 """
 
@@ -12,15 +16,13 @@ from __future__ import annotations
 
 import io
 import logging
-import mimetypes
 import urllib.request
 import uuid
-from pathlib import Path
 
 log = logging.getLogger("monitor.reporter")
 
 
-def _encode_multipart(fields: dict[str, str], image: Path | None):
+def _encode_multipart(fields: dict[str, str]):
     boundary = uuid.uuid4().hex
     buf = io.BytesIO()
 
@@ -31,17 +33,6 @@ def _encode_multipart(fields: dict[str, str], image: Path | None):
         w(f"--{boundary}\r\n")
         w(f'Content-Disposition: form-data; name="{name}"\r\n\r\n')
         w(f"{value}\r\n")
-
-    if image is not None and image.exists():
-        ctype = mimetypes.guess_type(str(image))[0] or "image/jpeg"
-        w(f"--{boundary}\r\n")
-        w(
-            'Content-Disposition: form-data; name="image"; '
-            f'filename="{image.name}"\r\n'
-        )
-        w(f"Content-Type: {ctype}\r\n\r\n")
-        buf.write(image.read_bytes())
-        w("\r\n")
 
     w(f"--{boundary}--\r\n")
     return buf.getvalue(), f"multipart/form-data; boundary={boundary}"
@@ -70,16 +61,21 @@ class Reporter:
             return False
 
     def report_event(
-        self, kind: str, reasons: list[str], score: float, image: Path | None
+        self, kind: str, reasons: list[str], score: float, context: str = ""
     ) -> bool:
         if not self.enabled:
             return False
-        fields = {"kind": kind, "reasons": "; ".join(reasons), "score": str(score)}
-        body, ctype = _encode_multipart(fields, image)
+        fields = {
+            "kind": kind,
+            "reasons": "; ".join(reasons),
+            "score": str(score),
+            "context": context,
+        }
+        body, ctype = _encode_multipart(fields)
         return self._post("/api/events", body, ctype)
 
     def heartbeat(self) -> bool:
         if not self.enabled:
             return False
-        body, ctype = _encode_multipart({}, None)
+        body, ctype = _encode_multipart({})
         return self._post("/api/heartbeat", body, ctype)

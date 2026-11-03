@@ -56,12 +56,16 @@ class Partnership(SQLModel, table=True):
 
 
 class Event(SQLModel, table=True):
+    # NOTE: this server deliberately stores NO screenshots. Only text metadata
+    # about a flagged moment is kept — never the image itself — to minimize
+    # privacy and legal exposure. Any visual review happens peer-to-peer (the
+    # agent emails a blurred capture straight to the partner), not here.
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, foreign_key="user.id")
     device_id: int = Field(index=True, foreign_key="device.id")
     ts: datetime = Field(default_factory=_now, index=True)
-    # flagged | capture_failure | heartbeat_miss
+    # flagged | capture_failure | filter_tampered | heartbeat_miss
     kind: str = "flagged"
     reasons: str = ""
     score: float = 0.0
-    image_path: str = ""  # server-relative path to the blurred capture, if any
+    context: str = ""  # optional text context (app/site/title), never an image

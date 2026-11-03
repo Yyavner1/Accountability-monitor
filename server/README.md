@@ -44,8 +44,12 @@ get an API key once), and invite a partner by email.
 - **Accounts:** email + password (bcrypt), signed session cookie.
 - **Devices:** each enrolled device gets an API key; only its SHA-256 hash is
   stored. The agent sends it as the `X-API-Key` header.
-- **Events:** `flagged`, `capture_failure`. Blurred captures are uploaded and
-  served only to authorized viewers via `/captures/{name}`.
+- **Events:** `flagged`, `capture_failure`, `filter_tampered` — **text
+  metadata only**. The server never receives or stores a screenshot. Any
+  visual the partner sees is emailed to them directly by the agent, never
+  routed through or kept on the server. This is the main privacy/legal
+  safeguard (the Accountable2You model rather than the screenshot-to-server
+  model).
 - **Partners:** invite by email; when that email signs up, the pending
   partnership is auto-accepted and they can view the inviter's events.
 

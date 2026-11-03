@@ -10,7 +10,7 @@
 {% if events %}
 <table>
   <thead>
-    <tr><th>When</th><th>Person</th><th>Type</th><th>Details</th><th>Capture</th></tr>
+    <tr><th>When</th><th>Person</th><th>Type</th><th>Details</th><th>Context</th></tr>
   </thead>
   <tbody>
   {% for e in events %}
@@ -19,7 +19,7 @@
       <td>{{ users[e.user_id].display_name if e.user_id in users else e.user_id }}</td>
       <td class="{{ 'flag' if e.kind != 'heartbeat' else '' }}">{{ e.kind }}</td>
       <td>{{ e.reasons }}</td>
-      <td>{% if e.image_path %}<a href="/captures/{{ e.image_path }}" target="_blank">view</a>{% else %}&mdash;{% endif %}</td>
+      <td class="mut">{{ e.context or "—" }}</td>
     </tr>
   {% endfor %}
   </tbody>

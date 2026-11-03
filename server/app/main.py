@@ -1,26 +1,24 @@
-"""FastAPI application: accounts, device enrollment, event ingest, dashboard."""
+"""FastAPI application: accounts, device enrollment, event ingest, dashboard.
+
+This server stores only text metadata about flagged moments — never
+screenshots. See models.Event.
+"""
 
 from __future__ import annotations
 
-import os
-import shutil
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import (
     Depends,
     FastAPI,
-    File,
     Form,
     Header,
     HTTPException,
     Request,
-    UploadFile,
     status,
 )
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
@@ -40,15 +38,6 @@ app = FastAPI(title="Accountability Monitor")
 @app.on_event("startup")
 def _startup() -> None:
     init_db()
-    Path(settings.media_dir).mkdir(parents=True, exist_ok=True)
-
-
-# Serve blurred captures. These are sensitive, so the directory is only
-# reachable through the authenticated /captures/{id} route below, not here.
-app.mount(
-    "/static", StaticFiles(directory=str(BASE_DIR / "static"), check_dir=False),
-    name="static",
-)
 
 
 # --- helpers ---------------------------------------------------------------
@@ -390,52 +379,23 @@ def api_event(
     kind: str = Form("flagged"),
     reasons: str = Form(""),
     score: float = Form(0.0),
-    image: UploadFile | None = File(None),
+    context: str = Form(""),
     device: Device = Depends(_device_auth),
     session: Session = Depends(get_session),
 ):
-    image_path = ""
-    if image is not None:
-        media_dir = Path(settings.media_dir)
-        media_dir.mkdir(parents=True, exist_ok=True)
-        name = f"{uuid.uuid4().hex}.jpg"
-        dest = media_dir / name
-        with open(dest, "wb") as f:
-            shutil.copyfileobj(image.file, f)
-        image_path = name
-
+    # Text metadata only. This endpoint intentionally accepts no image upload,
+    # so no screenshot ever reaches or is stored on the server.
     device.last_seen = datetime.now(timezone.utc)
     session.add(device)
     ev = Event(
         user_id=device.user_id,
         device_id=device.id,
         kind=kind,
-        reasons=reasons,
+        reasons=reasons[:500],
         score=score,
-        image_path=image_path,
+        context=context[:500],
     )
     session.add(ev)
     session.commit()
     session.refresh(ev)
     return {"ok": True, "event_id": ev.id}
-
-
-@app.get("/captures/{name}")
-def get_capture(
-    name: str,
-    user: User = Depends(auth.current_user),
-    session: Session = Depends(get_session),
-):
-    # Only serve a capture if it belongs to a user this account may view.
-    ev = session.exec(select(Event).where(Event.image_path == name)).first()
-    if not ev:
-        raise HTTPException(status_code=404, detail="not found")
-    visible = {user.id, *_monitored_user_ids_for_partner(user, session)}
-    if ev.user_id not in visible:
-        raise HTTPException(status_code=403, detail="forbidden")
-    path = Path(settings.media_dir) / name
-    if not path.exists():
-        raise HTTPException(status_code=404, detail="not found")
-    from fastapi.responses import FileResponse
-
-    return FileResponse(str(path), media_type="image/jpeg")
