@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Accountability Monitor{% endblock %}</title>
+  <style>
+    :root { color-scheme: light dark; --fg:#1a1a1a; --bg:#fff; --mut:#666;
+            --line:#e4e4e7; --accent:#2563eb; --flag:#dc2626; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fg:#e7e7e9; --bg:#131316; --mut:#9a9aa2; --line:#2a2a30;
+              --accent:#60a5fa; --flag:#f87171; }
+    }
+    * { box-sizing: border-box; }
+    body { font: 15px/1.5 -apple-system, system-ui, sans-serif; color: var(--fg);
+           background: var(--bg); margin: 0; }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+    header { display: flex; justify-content: space-between; align-items: center;
+             border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+    h1 { font-size: 18px; margin: 0; }
+    h2 { font-size: 15px; margin: 28px 0 10px; }
+    a { color: var(--accent); }
+    .mut { color: var(--mut); }
+    .card { border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+            margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line);
+             vertical-align: top; }
+    th { color: var(--mut); font-weight: 600; font-size: 13px; }
+    .flag { color: var(--flag); font-weight: 600; }
+    input, button { font: inherit; }
+    input[type=text], input[type=email], input[type=password] {
+      width: 100%; padding: 9px 10px; border: 1px solid var(--line);
+      border-radius: 8px; background: var(--bg); color: var(--fg); }
+    button { background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+             padding: 9px 14px; cursor: pointer; }
+    form.inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    code { background: var(--line); padding: 2px 6px; border-radius: 5px; }
+    thead th { position: sticky; top: 0; background: var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    {% block header %}{% endblock %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Device enrolled{% endblock %}
+{% block content %}
+<header><h1>Accountability Monitor</h1><div class="mut"><a href="/">Back</a></div></header>
+
+<h2>Device "{{ device.name }}" enrolled</h2>
+<div class="card">
+  <p>Put these values in that device's <code>config.json</code>:</p>
+  <p><code>"server_url": "http://YOUR_SERVER"</code></p>
+  <p><code>"device_api_key": "{{ api_key }}"</code></p>
+  <p class="flag">This key is shown only once. Copy it now.</p>
+</div>
+{% endblock %}

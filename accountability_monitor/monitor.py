@@ -25,6 +25,7 @@ from pathlib import Path
 from . import capture, storage
 from .classifier import Classifier
 from .emailer import Emailer
+from .reporter import Reporter
 
 log = logging.getLogger("monitor")
 
@@ -74,6 +75,9 @@ class Monitor:
             smtp_host=cfg.get("smtp_host", "smtp.gmail.com"),
             smtp_port=cfg.get("smtp_port", 465),
         )
+        self.reporter = Reporter(
+            cfg.get("server_url", ""), cfg.get("device_api_key", "")
+        )
         self.capture_failure_threshold = int(
             cfg.get("capture_failure_threshold", 3)
         )
@@ -82,7 +86,7 @@ class Monitor:
         self._capture_failures = 0
         self._last_capture_fail_alert = 0.0
 
-    def _handle_flagged(self, shot: Path, reasons: list[str]) -> None:
+    def _handle_flagged(self, shot: Path, reasons: list[str]) -> Path:
         kept: Path = shot
         if self.blur:
             blurred = self.capture_dir / f"flagged-{shot.name}"
@@ -99,6 +103,7 @@ class Monitor:
         if now - self._last_alert >= self.alert_cooldown:
             if self.emailer.send_alert(reasons, str(kept)):
                 self._last_alert = now
+        return kept
 
     def _handle_clean(self, shot: Path) -> None:
         self.store.record(False, [], None)
@@ -130,6 +135,12 @@ class Monitor:
         if now - self._last_capture_fail_alert >= self.alert_cooldown:
             if self.emailer.send_capture_failure(self._capture_failures):
                 self._last_capture_fail_alert = now
+            self.reporter.report_event(
+                "capture_failure",
+                [f"{self._capture_failures} consecutive blank/failed captures"],
+                0.0,
+                None,
+            )
 
     def tick(self) -> None:
         self._maybe_summary()
@@ -153,10 +164,14 @@ class Monitor:
         self._capture_failures = 0
         verdict = self.classifier.classify(str(shot))
         if verdict.flagged:
-            self._handle_flagged(shot, verdict.reasons)
+            kept = self._handle_flagged(shot, verdict.reasons)
+            self.reporter.report_event(
+                "flagged", verdict.reasons, verdict.top_score, kept
+            )
         else:
             self._handle_clean(shot)
         heartbeat(self.healthcheck_url)
+        self.reporter.heartbeat()
 
     def run(self) -> None:
         log.info("accountability monitor started (interval=%ss)", self.interval)

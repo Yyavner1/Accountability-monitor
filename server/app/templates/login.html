@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Sign in · Accountability Monitor{% endblock %}
+{% block content %}
+<header><h1>Accountability Monitor</h1></header>
+
+<div class="card" style="margin-top:24px">
+  <h2>Sign in</h2>
+  <form method="post" action="/login">
+    <p><input type="email" name="email" placeholder="Email" required></p>
+    <p><input type="password" name="password" placeholder="Password" required></p>
+    <button type="submit">Sign in</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Create an account</h2>
+  <p class="mut">For the person being monitored, or for an accountability partner.</p>
+  <form method="post" action="/signup">
+    <p><input type="text" name="display_name" placeholder="Name (optional)"></p>
+    <p><input type="email" name="email" placeholder="Email" required></p>
+    <p><input type="password" name="password" placeholder="Password" required></p>
+    <button type="submit">Create account</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Accountability Monitor{% endblock %}
+{% block content %}
+<header>
+  <h1>Accountability Monitor</h1>
+  <div class="mut">{{ user.display_name }} · <a href="/logout">Sign out</a></div>
+</header>
+
+<h2>Activity</h2>
+{% if events %}
+<table>
+  <thead>
+    <tr><th>When</th><th>Person</th><th>Type</th><th>Details</th><th>Capture</th></tr>
+  </thead>
+  <tbody>
+  {% for e in events %}
+    <tr>
+      <td class="mut">{{ e.ts.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ users[e.user_id].display_name if e.user_id in users else e.user_id }}</td>
+      <td class="{{ 'flag' if e.kind != 'heartbeat' else '' }}">{{ e.kind }}</td>
+      <td>{{ e.reasons }}</td>
+      <td>{% if e.image_path %}<a href="/captures/{{ e.image_path }}" target="_blank">view</a>{% else %}&mdash;{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="mut">No activity reported yet.</p>
+{% endif %}
+
+<h2>Your devices</h2>
+<div class="card">
+  {% if devices %}
+    <table>
+      <thead><tr><th>Name</th><th>Platform</th><th>Last seen</th></tr></thead>
+      <tbody>
+      {% for d in devices %}
+        <tr>
+          <td>{{ d.name }}</td>
+          <td class="mut">{{ d.platform or "—" }}</td>
+          <td class="mut">{{ d.last_seen.strftime("%Y-%m-%d %H:%M") if d.last_seen else "never" }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="mut">No devices enrolled yet.</p>
+  {% endif %}
+  <form class="inline" method="post" action="/devices" style="margin-top:12px">
+    <input type="text" name="name" placeholder="Device name (e.g. MacBook)" style="flex:1">
+    <input type="text" name="platform" placeholder="macos / windows / linux" style="flex:1">
+    <button type="submit">Enroll device</button>
+  </form>
+</div>
+
+<h2>Accountability partners</h2>
+<div class="card">
+  {% if partners %}
+    <ul>
+    {% for p in partners %}
+      <li>{{ p.partner_email }} <span class="mut">({{ p.status }})</span></li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mut">No partners invited yet.</p>
+  {% endif %}
+  <form class="inline" method="post" action="/partners" style="margin-top:12px">
+    <input type="email" name="partner_email" placeholder="partner@example.com" style="flex:1">
+    <button type="submit">Invite partner</button>
+  </form>
+</div>
+{% endblock %}

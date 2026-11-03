@@ -20,5 +20,8 @@
   "capture_failure_threshold": 3,
   "daily_summary_hour": 21,
 
-  "healthcheck_url": ""
+  "healthcheck_url": "",
+
+  "server_url": "",
+  "device_api_key": ""
 }
