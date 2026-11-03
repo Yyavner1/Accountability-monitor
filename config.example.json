@@ -17,6 +17,7 @@
   "blur_flagged_captures": true,
 
   "alert_cooldown_seconds": 900,
+  "capture_failure_threshold": 3,
   "daily_summary_hour": 21,
 
   "healthcheck_url": ""

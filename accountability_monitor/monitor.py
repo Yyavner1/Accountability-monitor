@@ -74,8 +74,13 @@ class Monitor:
             smtp_host=cfg.get("smtp_host", "smtp.gmail.com"),
             smtp_port=cfg.get("smtp_port", 465),
         )
+        self.capture_failure_threshold = int(
+            cfg.get("capture_failure_threshold", 3)
+        )
         self._last_alert = 0.0
         self._last_summary_day = None
+        self._capture_failures = 0
+        self._last_capture_fail_alert = 0.0
 
     def _handle_flagged(self, shot: Path, reasons: list[str]) -> None:
         kept: Path = shot
@@ -108,22 +113,50 @@ class Monitor:
                 self._last_summary_day = day
             self.store.prune()
 
+    def _handle_capture_failure(self) -> None:
+        """A capture failed or came back blank (e.g. permission revoked).
+
+        We do NOT heartbeat, so the external watchdog also fires, and after a
+        few consecutive failures we email the partner directly.
+        """
+        self._capture_failures += 1
+        log.warning(
+            "capture invalid (%d consecutive); not sending heartbeat",
+            self._capture_failures,
+        )
+        if self._capture_failures < self.capture_failure_threshold:
+            return
+        now = time.time()
+        if now - self._last_capture_fail_alert >= self.alert_cooldown:
+            if self.emailer.send_capture_failure(self._capture_failures):
+                self._last_capture_fail_alert = now
+
     def tick(self) -> None:
-        heartbeat(self.healthcheck_url)
         self._maybe_summary()
 
+        # An idle machine is healthy and correctly not capturing, so keep the
+        # heartbeat alive to avoid false tamper alerts (e.g. overnight).
         if not capture.device_in_use(self.idle_threshold):
             log.debug("device idle; skipping capture")
+            heartbeat(self.healthcheck_url)
             return
 
         shot = capture.take_screenshot(self.capture_dir)
-        if not shot:
+        if not shot or not capture.capture_looks_valid(shot):
+            if shot:
+                shot.unlink(missing_ok=True)
+            self._handle_capture_failure()
             return
+
+        # Valid capture: the monitor can see the screen. Reset the failure
+        # counter, classify, act, and only now confirm the heartbeat.
+        self._capture_failures = 0
         verdict = self.classifier.classify(str(shot))
         if verdict.flagged:
             self._handle_flagged(shot, verdict.reasons)
         else:
             self._handle_clean(shot)
+        heartbeat(self.healthcheck_url)
 
     def run(self) -> None:
         log.info("accountability monitor started (interval=%ss)", self.interval)

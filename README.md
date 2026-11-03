@@ -41,6 +41,13 @@ and control, and you choose who receives the reports.
   machine, no local process can be made truly unremovable — the external
   heartbeat is what makes tampering visible: if the agent stops pinging,
   healthchecks.io emails your partner.
+- **Tamper detection:** the heartbeat is only sent after a capture that
+  actually worked. If the agent is stopped or removed, pings stop. If screen
+  capture is disabled or comes back blank (e.g. Screen Recording permission
+  revoked), the agent detects the blank frames, stops pinging (so the
+  heartbeat still fires), and also emails the partner directly after
+  `capture_failure_threshold` consecutive bad captures. An idle machine keeps
+  pinging normally, so an unattended computer does not raise a false alarm.
 
 ## Install
 
@@ -80,6 +87,7 @@ See [`config.example.json`](config.example.json). Key fields:
 | `keywords` | lowercase substrings matched against on-screen text |
 | `blur_flagged_captures` | blur kept captures (recommended) |
 | `alert_cooldown_seconds` | minimum gap between alert emails |
+| `capture_failure_threshold` | blank/failed captures in a row before a tamper email |
 | `healthcheck_url` | healthchecks.io ping URL (tamper alert) |
 
 ## Run manually (for testing)

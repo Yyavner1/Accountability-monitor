@@ -81,6 +81,18 @@ class Emailer:
         msg.set_content(body)
         return self._send(msg)
 
+    def send_capture_failure(self, consecutive: int) -> bool:
+        msg = EmailMessage()
+        msg["Subject"] = "Accountability monitor: screen capture stopped working"
+        msg.set_content(
+            "The accountability monitor is running but has not produced a "
+            f"valid screen capture in {consecutive} consecutive checks.\n\n"
+            "This usually means Screen Recording permission was turned off, "
+            "or the screen is being captured as blank. The monitor cannot "
+            "see the screen until this is restored."
+        )
+        return self._send(msg)
+
     def send_heartbeat_warning(self) -> bool:
         """Sent by an external watchdog, not the agent itself."""
         msg = EmailMessage()

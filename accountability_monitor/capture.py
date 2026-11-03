@@ -120,6 +120,26 @@ def _capture_linux(out: Path) -> bool:
     return _capture_mss(out)
 
 
+def capture_looks_valid(path: Path) -> bool:
+    """True if the capture looks like a real screen, not a blank/black frame.
+
+    When screen-recording permission is revoked (e.g. on macOS), capture can
+    still produce a file, but it is near-uniform (all one color). We treat a
+    near-uniform image as an invalid capture so the caller can react to it as
+    a tamper signal rather than silently logging black frames as "clean".
+    """
+    try:
+        from PIL import Image, ImageStat
+
+        with Image.open(path) as im:
+            stat = ImageStat.Stat(im.convert("L"))
+        # stddev of luminance; a real screen has structure, a blank frame ~0.
+        return stat.stddev[0] >= 3.0
+    except Exception as exc:  # pragma: no cover - runtime safety
+        log.warning("could not validate capture (%s); assuming valid", exc)
+        return True
+
+
 def take_screenshot(dest_dir: Path) -> Path | None:
     """Capture all displays into a single JPEG. Returns the path or None."""
     dest_dir.mkdir(parents=True, exist_ok=True)
