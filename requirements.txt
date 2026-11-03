@@ -1,0 +1,16 @@
+# Image classification (ONNX, runs on CPU, no network).
+nudenet>=3.4.2
+onnxruntime>=1.17.0
+pillow>=10.0.0
+
+# Cross-platform screen capture (used on Windows, and on Linux/X11 when no
+# native tool is present). Not needed on macOS, which uses screencapture.
+mss>=9.0.0
+
+# Optional: on-screen text OCR for keyword matching. If you skip this,
+# keyword detection is disabled and image classification still works.
+# Install the tesseract binary too:
+#   macOS:    brew install tesseract
+#   Windows:  winget install UB-Mannheim.TesseractOCR
+#   Linux:    sudo apt install tesseract-ocr
+pytesseract>=0.3.10

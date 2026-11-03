@@ -1,0 +1,23 @@
+{
+  "partner_email": "partner@example.com",
+
+  "sender_email": "youraddress@gmail.com",
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 465,
+  "smtp_password": "your-16-char-gmail-app-password",
+
+  "capture_interval_seconds": 120,
+  "idle_threshold_seconds": 60,
+
+  "nsfw_score_threshold": 0.80,
+  "keywords": ["pornhub", "xvideos", "xnxx", "onlyfans", "redtube", "xhamster"],
+
+  "screenshot_dir": "~/Library/Application Support/AccountabilityMonitor/captures",
+  "retention_days": 14,
+  "blur_flagged_captures": true,
+
+  "alert_cooldown_seconds": 900,
+  "daily_summary_hour": 21,
+
+  "healthcheck_url": ""
+}
