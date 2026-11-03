@@ -11,6 +11,19 @@ warns your partner if monitoring ever goes quiet.
 This is consent-based self-monitoring. You install it on machines you own
 and control, and you choose who receives the reports.
 
+## How it's distributed
+
+This is **software you download and run yourself**, not a service someone
+else operates. Everything runs on your own device: screenshots are analyzed
+locally and never leave your machine, and alerts are emailed **directly from
+your device to your partner**. No central server receives, processes, or
+stores your activity or images. (A dashboard backend exists in
+[`server/`](server/) but is entirely optional and self-hosted — see its
+note; it is not required and is not run by the people distributing this.)
+
+See [`EULA.md`](EULA.md), [`PRIVACY.md`](PRIVACY.md), and, if you intend to
+sell it, [`SELLING.md`](SELLING.md).
+
 ## How it works
 
 ```

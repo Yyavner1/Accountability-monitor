@@ -1,10 +1,17 @@
-# Accountability Monitor — backend (SaaS)
+# Accountability Monitor — backend (OPTIONAL, self-hosted)
 
-A small FastAPI backend that turns the desktop agent into a hosted service:
-accounts, device enrollment, an event-ingest API the agents report to, and a
-web dashboard where an accountability partner signs in and sees a person's
-flagged activity. Email from the agent still works independently; reporting
-to this backend is additive.
+> **Optional and self-hosted.** The product is distribute-only: the desktop
+> agent runs on each user's device and emails their partner directly, with no
+> server required. This backend is here only for someone who *chooses* to run
+> their own dashboard. If you distribute the software, you are **not** meant
+> to operate this for your users — doing so would make you a handler of their
+> data and take on exactly the legal risk the distribute-only model avoids.
+> Run it only for yourself, or leave it unused.
+
+A small FastAPI backend that adds, for a self-hoster: accounts, device
+enrollment, an event-ingest API the agents report to, and a web dashboard
+where an accountability partner signs in and sees a person's flagged
+activity. Email from the agent works independently; this backend is additive.
 
 > Status: MVP. Accounts with email verification, age + Terms/Privacy consent
 > at signup, password reset, account/data deletion, login rate-limiting, a
