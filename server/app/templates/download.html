@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Download · Accountability Monitor{% endblock %}
+{% block content %}
+<header>
+  <h1>Download the app</h1>
+  <div class="mut"><a href="/">Dashboard</a> · <a href="/settings">Settings</a></div>
+</header>
+
+<div class="card" style="margin-top:20px">
+  <p><a href="{{ agent_url }}"><button type="button">Download the agent</button></a></p>
+  <p class="mut">Works on macOS, Windows, and Linux.</p>
+</div>
+
+<h2>Set up</h2>
+<div class="card">
+  <ol>
+    <li>Unzip the download.</li>
+    <li>Run the installer for your system:
+      <ul class="mut">
+        <li>macOS: <code>./install.sh</code></li>
+        <li>Linux: <code>./install_linux.sh</code></li>
+        <li>Windows: <code>install_windows.ps1</code> (elevated PowerShell)</li>
+      </ul>
+    </li>
+    <li>Enroll this device on the dashboard to get an API key, and paste it
+        (and this server's address) into <code>config.json</code>.</li>
+    <li>Optional but recommended: turn on the website filter
+        (<code>sudo ./install_filter.sh</code>) and install the browser
+        extension from the <code>extension</code> folder.</li>
+  </ol>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Settings · Accountability Monitor{% endblock %}
+{% block content %}
+<header>
+  <h1>Settings</h1>
+  <div class="mut"><a href="/">Dashboard</a> · <a href="/download">Download</a> · <a href="/logout">Sign out</a></div>
+</header>
+
+<h2>Preferences</h2>
+<div class="card">
+  <form method="post" action="/settings/preferences">
+    <p><label>Name<br><input type="text" name="display_name" value="{{ user.display_name }}"></label></p>
+    <p><label>Summary email<br>
+      <select name="summary_frequency">
+        <option value="daily"  {{ 'selected' if user.summary_frequency=='daily' }}>Every day</option>
+        <option value="weekly" {{ 'selected' if user.summary_frequency=='weekly' }}>Every week</option>
+        <option value="off"    {{ 'selected' if user.summary_frequency=='off' }}>Off (alerts only)</option>
+      </select></label></p>
+    <button type="submit">Save preferences</button>
+  </form>
+</div>
+
+<h2>Accountability partners</h2>
+<div class="card">
+  {% if partners %}
+    <table>
+      <thead><tr><th>Email</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for p in partners %}
+        <tr>
+          <td>{{ p.partner_email }}</td>
+          <td class="mut">{{ p.status }}</td>
+          <td>
+            <form method="post" action="/partners/remove" style="margin:0">
+              <input type="hidden" name="partnership_id" value="{{ p.id }}">
+              <button type="submit" style="background:#dc2626">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="mut">No partners yet.</p>
+  {% endif %}
+  <form class="inline" method="post" action="/partners" style="margin-top:12px">
+    <input type="email" name="partner_email" placeholder="partner@example.com" style="flex:1">
+    <button type="submit">Invite partner</button>
+  </form>
+</div>
+
+<h2>Subscription</h2>
+<div class="card">
+  <p>Status: <strong>{{ user.subscription_status }}</strong></p>
+  {% if billing_configured %}
+    {% if user.subscription_status in ['active','trialing'] %}
+      <form method="post" action="/billing/portal">
+        <button type="submit">Manage billing</button>
+      </form>
+    {% else %}
+      <form method="post" action="/billing/checkout">
+        <button type="submit">Subscribe</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <p class="mut">Billing isn't configured on this server yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

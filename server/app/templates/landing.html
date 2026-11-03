@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Accountability Monitor{% endblock %}
+{% block content %}
+<header>
+  <h1>Accountability Monitor</h1>
+  <div class="mut"><a href="/login">Sign in</a></div>
+</header>
+
+<div class="card" style="margin-top:24px">
+  <h2>Stay accountable, on your own terms</h2>
+  <p class="mut">Self-hosted accountability for your own devices. Known adult
+    sites are blocked, explicit images are blurred in your browser, and
+    anything else on screen is checked privately on your machine and reported
+    to a partner you choose.</p>
+  <p style="margin-top:14px">
+    <a href="/login"><button type="button">Create an account</button></a>
+  </p>
+</div>
+
+<div class="card">
+  <h2>How it works</h2>
+  <ol class="mut">
+    <li>Create an account and add an accountability partner.</li>
+    <li>Download the app and enroll your device.</li>
+    <li>Blocked sites never load; flagged activity is reported to your partner.</li>
+    <li>Choose daily or weekly summaries, and manage everything here.</li>
+  </ol>
+</div>
+{% endblock %}

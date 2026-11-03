@@ -23,6 +23,13 @@ class User(SQLModel, table=True):
     display_name: str = ""
     created_at: datetime = Field(default_factory=_now)
 
+    # Preferences.
+    summary_frequency: str = "daily"  # daily | weekly | off
+
+    # Billing (Stripe).
+    stripe_customer_id: str | None = None
+    subscription_status: str = "inactive"  # active | trialing | inactive
+
 
 class Device(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)

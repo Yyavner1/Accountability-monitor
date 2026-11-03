@@ -6,3 +6,4 @@ passlib>=1.7.4
 itsdangerous>=2.1.0
 python-multipart>=0.0.9
 pydantic-settings>=2.2.0
+stripe>=9.0.0

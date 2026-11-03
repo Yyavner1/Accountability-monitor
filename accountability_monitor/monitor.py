@@ -61,6 +61,7 @@ class Monitor:
         self.alert_cooldown = int(cfg.get("alert_cooldown_seconds", 900))
         self.blur = bool(cfg.get("blur_flagged_captures", True))
         self.summary_hour = int(cfg.get("daily_summary_hour", 21))
+        self.summary_frequency = cfg.get("summary_frequency", "daily")
         self.healthcheck_url = cfg.get("healthcheck_url", "")
 
         self.capture_dir = _expand(cfg["screenshot_dir"])
@@ -113,8 +114,13 @@ class Monitor:
         shot.unlink(missing_ok=True)
 
     def _maybe_summary(self) -> None:
+        if self.summary_frequency == "off":
+            return
         now = time.localtime()
         day = time.strftime("%Y-%m-%d", now)
+        # Weekly summaries go out on Mondays only; daily go out every day.
+        if self.summary_frequency == "weekly" and now.tm_wday != 0:
+            return
         if now.tm_hour == self.summary_hour and self._last_summary_day != day:
             flagged, total = self.store.counts_last_24h()
             if self.emailer.send_summary(flagged, total):

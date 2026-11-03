@@ -20,5 +20,20 @@ class Settings(BaseSettings):
     # Cookie lifetime in seconds (default 14 days).
     session_max_age: int = 14 * 24 * 3600
 
+    # Public base URL of this server (used for Stripe redirect URLs).
+    public_url: str = "http://127.0.0.1:8000"
+
+    # Billing (Stripe). Leave the keys empty to run without billing; set
+    # require_subscription=True only once Stripe is configured.
+    stripe_secret_key: str = ""
+    stripe_price_id: str = ""
+    stripe_webhook_secret: str = ""
+    require_subscription: bool = False
+
+    # Where to download the desktop agent from (shown on the download page).
+    agent_download_url: str = (
+        "https://github.com/yyavner1/accountability-monitor/archive/refs/heads/main.zip"
+    )
+
 
 settings = Settings()

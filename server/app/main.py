@@ -24,10 +24,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
-from . import auth
+from . import auth, billing
 from .config import settings
 from .db import get_session, init_db
 from .models import Device, Event, Partnership, User
+
+SUMMARY_FREQUENCIES = {"daily", "weekly", "off"}
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
@@ -53,6 +55,18 @@ app.mount(
 
 def _redirect(path: str) -> RedirectResponse:
     return RedirectResponse(path, status_code=status.HTTP_303_SEE_OTHER)
+
+
+def _optional_user(request: Request, session: Session) -> User | None:
+    raw = request.cookies.get(auth.SESSION_COOKIE)
+    uid = auth.read_session_cookie(raw) if raw else None
+    return session.get(User, uid) if uid else None
+
+
+def _subscription_ok(user: User) -> bool:
+    if not settings.require_subscription:
+        return True
+    return user.subscription_status in ("active", "trialing")
 
 
 def _monitored_user_ids_for_partner(user: User, session: Session) -> list[int]:
@@ -142,14 +156,18 @@ def logout():
     return resp
 
 
-# --- dashboard -------------------------------------------------------------
+# --- landing + dashboard ---------------------------------------------------
 
 @app.get("/", response_class=HTMLResponse)
-def dashboard(
-    request: Request,
-    user: User = Depends(auth.current_user),
-    session: Session = Depends(get_session),
-):
+def home(request: Request, session: Session = Depends(get_session)):
+    user = _optional_user(request, session)
+    if not user:
+        return templates.TemplateResponse(request, "landing.html", {})
+    # Logged in: show the dashboard (or a subscribe prompt if gated).
+    if not _subscription_ok(user):
+        return templates.TemplateResponse(
+            request, "subscribe_required.html", {"user": user}
+        )
     # Events for this user's own devices, plus anyone they are a partner for.
     visible_ids = {user.id, *_monitored_user_ids_for_partner(user, session)}
     events = session.exec(
@@ -220,7 +238,129 @@ def invite_partner(
     )
     session.add(p)
     session.commit()
-    return _redirect("/")
+    return _redirect("/settings")
+
+
+@app.post("/partners/remove")
+def remove_partner(
+    partnership_id: int = Form(...),
+    user: User = Depends(auth.current_user),
+    session: Session = Depends(get_session),
+):
+    p = session.get(Partnership, partnership_id)
+    if p and p.user_id == user.id:
+        session.delete(p)
+        session.commit()
+    return _redirect("/settings")
+
+
+# --- settings, download, billing -------------------------------------------
+
+@app.get("/settings", response_class=HTMLResponse)
+def settings_page(
+    request: Request,
+    user: User = Depends(auth.current_user),
+    session: Session = Depends(get_session),
+):
+    partners = session.exec(
+        select(Partnership).where(Partnership.user_id == user.id)
+    ).all()
+    return templates.TemplateResponse(
+        request,
+        "settings.html",
+        {
+            "user": user,
+            "partners": partners,
+            "billing_configured": billing.configured(),
+        },
+    )
+
+
+@app.post("/settings/preferences")
+def update_preferences(
+    summary_frequency: str = Form("daily"),
+    display_name: str = Form(""),
+    user: User = Depends(auth.current_user),
+    session: Session = Depends(get_session),
+):
+    if summary_frequency in SUMMARY_FREQUENCIES:
+        user.summary_frequency = summary_frequency
+    if display_name.strip():
+        user.display_name = display_name.strip()
+    session.add(user)
+    session.commit()
+    return _redirect("/settings")
+
+
+@app.get("/download", response_class=HTMLResponse)
+def download_page(
+    request: Request, user: User = Depends(auth.current_user)
+):
+    return templates.TemplateResponse(
+        request,
+        "download.html",
+        {"user": user, "agent_url": settings.agent_download_url},
+    )
+
+
+@app.post("/billing/checkout")
+def billing_checkout(
+    user: User = Depends(auth.current_user),
+    session: Session = Depends(get_session),
+):
+    url = billing.create_checkout_session(user.email, user.stripe_customer_id)
+    if not url:
+        raise HTTPException(status_code=503, detail="billing not configured")
+    return _redirect(url)
+
+
+@app.post("/billing/portal")
+def billing_portal(user: User = Depends(auth.current_user)):
+    url = billing.create_billing_portal(user.stripe_customer_id or "")
+    if not url:
+        raise HTTPException(status_code=503, detail="no billing portal available")
+    return _redirect(url)
+
+
+@app.get("/billing/success", response_class=HTMLResponse)
+def billing_success(request: Request, user: User = Depends(auth.current_user)):
+    return templates.TemplateResponse(request, "billing_success.html", {"user": user})
+
+
+@app.post("/billing/webhook")
+async def billing_webhook(request: Request, session: Session = Depends(get_session)):
+    event = billing.parse_webhook(
+        await request.body(), request.headers.get("stripe-signature", "")
+    )
+    if not event:
+        raise HTTPException(status_code=400, detail="invalid webhook")
+    obj = event["data"]["object"]
+    etype = event["type"]
+    # Map the customer/email back to a user and update their status.
+    email = obj.get("client_reference_id") or obj.get("customer_email")
+    customer = obj.get("customer")
+    user = None
+    if email:
+        user = session.exec(select(User).where(User.email == email.lower())).first()
+    if not user and customer:
+        user = session.exec(
+            select(User).where(User.stripe_customer_id == customer)
+        ).first()
+    if user:
+        if customer:
+            user.stripe_customer_id = customer
+        if etype in ("checkout.session.completed", "customer.subscription.created",
+                     "customer.subscription.updated"):
+            status_val = obj.get("status", "active")
+            user.subscription_status = (
+                "active" if status_val in ("active", "trialing", "complete", "paid")
+                else status_val
+            )
+        elif etype in ("customer.subscription.deleted",):
+            user.subscription_status = "inactive"
+        session.add(user)
+        session.commit()
+    return {"ok": True}
 
 
 # --- agent API -------------------------------------------------------------

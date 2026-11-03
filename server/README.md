@@ -6,9 +6,22 @@ web dashboard where an accountability partner signs in and sees a person's
 flagged activity. Email from the agent still works independently; reporting
 to this backend is additive.
 
-> Status: MVP scaffold. Accounts, device API keys, event ingest, and the
-> dashboard work. Billing and transactional email for invites are not built
-> yet — see the roadmap in the top-level README.
+> Status: MVP. Accounts, a public landing page, a download page, device API
+> keys, event ingest, the dashboard, a settings page (email frequency, add /
+> remove partners), and Stripe subscription billing all work. Billing is
+> optional and off until Stripe keys are set. Transactional invite email and
+> server-side scheduled summaries are the remaining pieces.
+
+## Pages
+
+| path | who | purpose |
+|---|---|---|
+| `/` | public / logged in | landing page, or the dashboard when signed in |
+| `/login` | public | sign in / create account |
+| `/settings` | user | name, summary frequency, partners, subscription |
+| `/download` | user | download the agent + setup steps |
+| `/api/events`, `/api/heartbeat` | agents | report activity (X-API-Key) |
+| `/billing/checkout`, `/billing/portal`, `/billing/webhook` | user / Stripe | subscription |
 
 ## Run locally
 
@@ -52,6 +65,20 @@ In the agent's `config.json`:
 | `AM_SECRET_KEY` | session cookie signing key (set a long random value) |
 | `AM_DATABASE_URL` | SQLAlchemy URL (default local SQLite) |
 | `AM_MEDIA_DIR` | where uploaded blurred captures are stored |
+| `AM_PUBLIC_URL` | public base URL (Stripe redirect targets) |
+| `AM_STRIPE_SECRET_KEY` | Stripe secret key (`sk_...`); empty = billing off |
+| `AM_STRIPE_PRICE_ID` | recurring price id (`price_...`) |
+| `AM_STRIPE_WEBHOOK_SECRET` | webhook signing secret (`whsec_...`) |
+| `AM_REQUIRE_SUBSCRIPTION` | `true` gates access on an active subscription |
+
+## Enabling billing
+
+1. Create a Stripe account and a recurring **Price** for the subscription.
+2. Set `AM_STRIPE_SECRET_KEY` and `AM_STRIPE_PRICE_ID`.
+3. Add a webhook endpoint pointing at `/billing/webhook` for the events
+   `checkout.session.completed` and `customer.subscription.*`, and set
+   `AM_STRIPE_WEBHOOK_SECRET`.
+4. Set `AM_REQUIRE_SUBSCRIPTION=true` to require a subscription to use it.
 
 ## Before this is production-ready
 

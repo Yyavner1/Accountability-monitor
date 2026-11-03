@@ -3,7 +3,7 @@
 {% block content %}
 <header>
   <h1>Accountability Monitor</h1>
-  <div class="mut">{{ user.display_name }} · <a href="/logout">Sign out</a></div>
+  <div class="mut">{{ user.display_name }} · <a href="/settings">Settings</a> · <a href="/download">Download</a> · <a href="/logout">Sign out</a></div>
 </header>
 
 <h2>Activity</h2>
@@ -64,9 +64,7 @@
   {% else %}
     <p class="mut">No partners invited yet.</p>
   {% endif %}
-  <form class="inline" method="post" action="/partners" style="margin-top:12px">
-    <input type="email" name="partner_email" placeholder="partner@example.com" style="flex:1">
-    <button type="submit">Invite partner</button>
-  </form>
+  <p class="mut">Add or remove partners and set email frequency in
+    <a href="/settings">Settings</a>.</p>
 </div>
 {% endblock %}

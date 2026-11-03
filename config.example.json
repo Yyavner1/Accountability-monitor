@@ -18,6 +18,7 @@
 
   "alert_cooldown_seconds": 900,
   "capture_failure_threshold": 3,
+  "summary_frequency": "daily",
   "daily_summary_hour": 21,
 
   "healthcheck_url": "",
