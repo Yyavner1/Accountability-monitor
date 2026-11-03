@@ -35,5 +35,16 @@ class Settings(BaseSettings):
         "https://github.com/yyavner1/accountability-monitor/archive/refs/heads/main.zip"
     )
 
+    # Set True in production (behind HTTPS) so session cookies are Secure.
+    secure_cookies: bool = False
+
+    # Outbound email for verification / password reset. If unset, the link is
+    # logged to the server console instead of sent (fine for local testing).
+    smtp_host: str = ""
+    smtp_port: int = 465
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+
 
 settings = Settings()

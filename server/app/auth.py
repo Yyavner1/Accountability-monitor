@@ -20,6 +20,36 @@ _signer = URLSafeSerializer(settings.secret_key, salt="session")
 SESSION_COOKIE = "am_session"
 
 
+# --- single-use tokens (verification, password reset) ----------------------
+
+from itsdangerous import URLSafeTimedSerializer  # noqa: E402
+
+_verify_ts = URLSafeTimedSerializer(settings.secret_key, salt="verify")
+_reset_ts = URLSafeTimedSerializer(settings.secret_key, salt="reset")
+
+
+def make_verify_token(user_id: int) -> str:
+    return _verify_ts.dumps({"uid": user_id})
+
+
+def read_verify_token(token: str, max_age: int = 7 * 24 * 3600) -> int | None:
+    try:
+        return int(_verify_ts.loads(token, max_age=max_age)["uid"])
+    except Exception:
+        return None
+
+
+def make_reset_token(user_id: int) -> str:
+    return _reset_ts.dumps({"uid": user_id})
+
+
+def read_reset_token(token: str, max_age: int = 3600) -> int | None:
+    try:
+        return int(_reset_ts.loads(token, max_age=max_age)["uid"])
+    except Exception:
+        return None
+
+
 # --- passwords -------------------------------------------------------------
 
 def hash_password(password: str) -> str:
@@ -61,6 +91,30 @@ def read_session_cookie(value: str) -> int | None:
         return int(data["uid"])
     except (BadSignature, KeyError, ValueError, TypeError):
         return None
+
+
+# --- login rate limiting (in-memory) ---------------------------------------
+
+import time as _time  # noqa: E402
+
+_attempts: dict[str, list[float]] = {}
+_WINDOW = 300.0   # seconds
+_MAX_TRIES = 8    # per window per key
+
+
+def too_many_attempts(key: str) -> bool:
+    now = _time.time()
+    tries = [t for t in _attempts.get(key, []) if now - t < _WINDOW]
+    _attempts[key] = tries
+    return len(tries) >= _MAX_TRIES
+
+
+def record_attempt(key: str) -> None:
+    _attempts.setdefault(key, []).append(_time.time())
+
+
+def clear_attempts(key: str) -> None:
+    _attempts.pop(key, None)
 
 
 def current_user(

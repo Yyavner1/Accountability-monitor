@@ -6,6 +6,16 @@
   <div class="mut"><a href="/">Dashboard</a> · <a href="/download">Download</a> · <a href="/logout">Sign out</a></div>
 </header>
 
+{% if not user.email_verified %}
+<div class="card" style="border-color:#dc2626">
+  <p class="flag">Your email isn't verified yet. Verify it to receive reports
+    and to see activity as a partner.</p>
+  <form method="post" action="/resend-verification" style="margin:0">
+    <button type="submit">Resend verification email</button>
+  </form>
+</div>
+{% endif %}
+
 <h2>Preferences</h2>
 <div class="card">
   <form method="post" action="/settings/preferences">
@@ -66,4 +76,18 @@
     <p class="mut">Billing isn't configured on this server yet.</p>
   {% endif %}
 </div>
+
+<h2>Danger zone</h2>
+<div class="card" style="border-color:#dc2626">
+  <p class="mut">Permanently delete your account, devices, partners, and all
+    activity. This cannot be undone.</p>
+  <form method="post" action="/account/delete"
+        onsubmit="return confirm('Delete your account and all data? This cannot be undone.')">
+    <button type="submit" style="background:#dc2626">Delete my account and data</button>
+  </form>
+</div>
+
+<p class="mut" style="margin-top:20px">
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy Policy</a>
+</p>
 {% endblock %}

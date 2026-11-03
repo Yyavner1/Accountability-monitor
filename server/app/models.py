@@ -23,6 +23,10 @@ class User(SQLModel, table=True):
     display_name: str = ""
     created_at: datetime = Field(default_factory=_now)
 
+    # Account state.
+    email_verified: bool = False
+    accepted_terms_at: datetime | None = None
+
     # Preferences.
     summary_frequency: str = "daily"  # daily | weekly | off
 

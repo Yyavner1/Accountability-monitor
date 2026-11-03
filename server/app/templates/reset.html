@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Choose a new password{% endblock %}
+{% block content %}
+<header><h1>Accountability Monitor</h1></header>
+<div class="card" style="margin-top:24px">
+  <h2>Choose a new password</h2>
+  <form method="post" action="/reset">
+    <input type="hidden" name="token" value="{{ token }}">
+    <p><input type="password" name="password" placeholder="New password (8+ characters)" required></p>
+    <button type="submit">Set password</button>
+  </form>
+</div>
+{% endblock %}

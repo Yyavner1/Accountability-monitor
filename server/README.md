@@ -6,11 +6,15 @@ web dashboard where an accountability partner signs in and sees a person's
 flagged activity. Email from the agent still works independently; reporting
 to this backend is additive.
 
-> Status: MVP. Accounts, a public landing page, a download page, device API
-> keys, event ingest, the dashboard, a settings page (email frequency, add /
-> remove partners), and Stripe subscription billing all work. Billing is
-> optional and off until Stripe keys are set. Transactional invite email and
-> server-side scheduled summaries are the remaining pieces.
+> Status: MVP. Accounts with email verification, age + Terms/Privacy consent
+> at signup, password reset, account/data deletion, login rate-limiting, a
+> public landing page, a download page, device API keys, metadata-only event
+> ingest, the dashboard, a settings page (email frequency, add/remove
+> partners), and Stripe subscription billing all work. Billing is optional
+> and off until Stripe keys are set. SQLite upgrades auto-add new columns
+> (use Alembic for production). Remaining: HTTPS (comes with the host),
+> server-sent scheduled summaries + device-quiet alerts, and explicit CSRF
+> tokens (currently relying on SameSite=Lax session cookies).
 
 ## Pages
 
@@ -74,6 +78,8 @@ In the agent's `config.json`:
 | `AM_STRIPE_PRICE_ID` | recurring price id (`price_...`) |
 | `AM_STRIPE_WEBHOOK_SECRET` | webhook signing secret (`whsec_...`) |
 | `AM_REQUIRE_SUBSCRIPTION` | `true` gates access on an active subscription |
+| `AM_SECURE_COOKIES` | `true` in production (sets Secure on session cookie) |
+| `AM_SMTP_HOST`/`PORT`/`USER`/`PASSWORD`/`FROM` | server email for verification & reset; unset = links logged to console |
 
 ## Enabling billing
 

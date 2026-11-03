@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Reset password{% endblock %}
+{% block content %}
+<header><h1>Accountability Monitor</h1><div class="mut"><a href="/login">Sign in</a></div></header>
+<div class="card" style="margin-top:24px">
+  <h2>Reset your password</h2>
+  {% if request.query_params.get('sent') %}
+    <p class="mut">If that email has an account, a reset link is on its way.</p>
+  {% endif %}
+  <form method="post" action="/forgot">
+    <p><input type="email" name="email" placeholder="Your email" required></p>
+    <button type="submit">Send reset link</button>
+  </form>
+</div>
+{% endblock %}

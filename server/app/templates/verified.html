@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Email verified{% endblock %}
+{% block content %}
+<header><h1>Accountability Monitor</h1><div class="mut"><a href="/">Dashboard</a></div></header>
+<div class="card" style="margin-top:24px">
+  <h2>Email verified</h2>
+  <p class="mut">Thanks, {{ user.display_name }}. Your email is confirmed.</p>
+  <p><a href="/">Go to dashboard</a></p>
+</div>
+{% endblock %}

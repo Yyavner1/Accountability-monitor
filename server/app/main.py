@@ -22,7 +22,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
-from . import auth, billing
+from datetime import datetime as _dt
+
+from . import auth, billing, notify
 from .config import settings
 from .db import get_session, init_db
 from .models import Device, Event, Partnership, User
@@ -59,6 +61,10 @@ def _subscription_ok(user: User) -> bool:
 
 
 def _monitored_user_ids_for_partner(user: User, session: Session) -> list[int]:
+    # A partner only sees activity once they have verified their own email,
+    # so an invite can't expose data to an address nobody has proven they own.
+    if not user.email_verified:
+        return []
     rows = session.exec(
         select(Partnership).where(
             Partnership.partner_user_id == user.id,
@@ -66,6 +72,28 @@ def _monitored_user_ids_for_partner(user: User, session: Session) -> list[int]:
         )
     ).all()
     return [r.user_id for r in rows]
+
+
+def _set_session(resp, user_id: int):
+    resp.set_cookie(
+        auth.SESSION_COOKIE,
+        auth.make_session_cookie(user_id),
+        max_age=settings.session_max_age,
+        httponly=True,
+        samesite="lax",
+        secure=settings.secure_cookies,
+    )
+    return resp
+
+
+def _send_verification(user: User):
+    token = auth.make_verify_token(user.id)
+    link = f"{settings.public_url}/verify?token={token}"
+    notify.send(
+        user.email,
+        "Verify your email",
+        f"Confirm your Accountability Monitor email by opening:\n{link}",
+    )
 
 
 # --- auth pages ------------------------------------------------------------
@@ -80,21 +108,32 @@ def signup(
     email: str = Form(...),
     password: str = Form(...),
     display_name: str = Form(""),
+    is_adult: str = Form(""),
+    agree_terms: str = Form(""),
     session: Session = Depends(get_session),
 ):
     email = email.strip().lower()
+    if not is_adult or not agree_terms:
+        raise HTTPException(
+            status_code=400,
+            detail="You must confirm you are 18+ and agree to the Terms.",
+        )
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be 8+ characters.")
     if session.exec(select(User).where(User.email == email)).first():
         raise HTTPException(status_code=400, detail="email already registered")
     user = User(
         email=email,
         password_hash=auth.hash_password(password),
         display_name=display_name or email,
+        accepted_terms_at=_dt.now(timezone.utc),
     )
     session.add(user)
     session.commit()
     session.refresh(user)
 
-    # Link any pending partner invitations addressed to this email.
+    # Link any pending partner invitations addressed to this email. The
+    # partner still can't see anything until they verify their email.
     pend = session.exec(
         select(Partnership).where(
             Partnership.partner_email == email, Partnership.status == "pending"
@@ -106,36 +145,40 @@ def signup(
         session.add(p)
     session.commit()
 
-    resp = _redirect("/")
-    resp.set_cookie(
-        auth.SESSION_COOKIE,
-        auth.make_session_cookie(user.id),
-        max_age=settings.session_max_age,
-        httponly=True,
-        samesite="lax",
-    )
-    return resp
+    _send_verification(user)
+    return _set_session(_redirect("/"), user.id)
+
+
+@app.get("/verify", response_class=HTMLResponse)
+def verify(request: Request, token: str, session: Session = Depends(get_session)):
+    uid = auth.read_verify_token(token)
+    user = session.get(User, uid) if uid else None
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid or expired link")
+    user.email_verified = True
+    session.add(user)
+    session.commit()
+    return templates.TemplateResponse(request, "verified.html", {"user": user})
 
 
 @app.post("/login")
 def login(
+    request: Request,
     email: str = Form(...),
     password: str = Form(...),
     session: Session = Depends(get_session),
 ):
     email = email.strip().lower()
+    client = request.client.host if request.client else "?"
+    key = f"{client}:{email}"
+    if auth.too_many_attempts(key):
+        raise HTTPException(status_code=429, detail="too many attempts; wait a few minutes")
     user = session.exec(select(User).where(User.email == email)).first()
     if not user or not auth.verify_password(password, user.password_hash):
+        auth.record_attempt(key)
         raise HTTPException(status_code=401, detail="invalid email or password")
-    resp = _redirect("/")
-    resp.set_cookie(
-        auth.SESSION_COOKIE,
-        auth.make_session_cookie(user.id),
-        max_age=settings.session_max_age,
-        httponly=True,
-        samesite="lax",
-    )
-    return resp
+    auth.clear_attempts(key)
+    return _set_session(_redirect("/"), user.id)
 
 
 @app.get("/logout")
@@ -143,6 +186,69 @@ def logout():
     resp = _redirect("/login")
     resp.delete_cookie(auth.SESSION_COOKIE)
     return resp
+
+
+@app.post("/resend-verification")
+def resend_verification(
+    user: User = Depends(auth.current_user),
+):
+    if not user.email_verified:
+        _send_verification(user)
+    return _redirect("/settings")
+
+
+# --- password reset --------------------------------------------------------
+
+@app.get("/forgot", response_class=HTMLResponse)
+def forgot_page(request: Request):
+    return templates.TemplateResponse(request, "forgot.html", {})
+
+
+@app.post("/forgot")
+def forgot(email: str = Form(...), session: Session = Depends(get_session)):
+    email = email.strip().lower()
+    user = session.exec(select(User).where(User.email == email)).first()
+    # Always behave the same way, so this can't be used to probe for accounts.
+    if user:
+        link = f"{settings.public_url}/reset?token={auth.make_reset_token(user.id)}"
+        notify.send(email, "Reset your password",
+                    f"Reset your Accountability Monitor password:\n{link}")
+    return _redirect("/forgot?sent=1")
+
+
+@app.get("/reset", response_class=HTMLResponse)
+def reset_page(request: Request, token: str):
+    return templates.TemplateResponse(request, "reset.html", {"token": token})
+
+
+@app.post("/reset")
+def reset(
+    token: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    uid = auth.read_reset_token(token)
+    user = session.get(User, uid) if uid else None
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid or expired link")
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be 8+ characters.")
+    user.password_hash = auth.hash_password(password)
+    session.add(user)
+    session.commit()
+    return _redirect("/login")
+
+
+# --- static legal pages ----------------------------------------------------
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms(request: Request):
+    return templates.TemplateResponse(request, "terms.html", {})
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request):
+    return templates.TemplateResponse(request, "privacy.html", {})
 
 
 # --- landing + dashboard ---------------------------------------------------
@@ -279,6 +385,30 @@ def update_preferences(
     session.add(user)
     session.commit()
     return _redirect("/settings")
+
+
+@app.post("/account/delete")
+def delete_account(
+    user: User = Depends(auth.current_user),
+    session: Session = Depends(get_session),
+):
+    # Remove the account and everything tied to it.
+    for ev in session.exec(select(Event).where(Event.user_id == user.id)).all():
+        session.delete(ev)
+    for dv in session.exec(select(Device).where(Device.user_id == user.id)).all():
+        session.delete(dv)
+    for p in session.exec(
+        select(Partnership).where(
+            (Partnership.user_id == user.id)
+            | (Partnership.partner_user_id == user.id)
+        )
+    ).all():
+        session.delete(p)
+    session.delete(user)
+    session.commit()
+    resp = _redirect("/login")
+    resp.delete_cookie(auth.SESSION_COOKIE)
+    return resp
 
 
 @app.get("/download", response_class=HTMLResponse)
