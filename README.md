@@ -121,7 +121,17 @@ captures come out black.
 
 ## Configuration
 
-See [`config.example.json`](config.example.json). Key fields:
+The easiest way is the **local settings page** — run this and a page opens in
+your browser where you fill in the partner email, choose daily/weekly, adjust
+sensitivity, and send a test email:
+
+```bash
+python3 -m accountability_monitor.webui --config /path/to/config.json
+```
+
+It runs only on your computer (127.0.0.1) and edits the same `config.json`.
+You can also edit [`config.example.json`](config.example.json) by hand. Key
+fields:
 
 | key | meaning |
 |---|---|

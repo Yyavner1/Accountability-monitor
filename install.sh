@@ -53,10 +53,11 @@ cat <<EOF
 Done.
 
 Next steps:
-  1. Edit your config:
-       open -e "$CONFIG"
-     Set partner_email, sender_email, and smtp_password (a Gmail App
-     Password, created at https://myaccount.google.com/apppasswords).
+  1. Open the settings page (easiest) to fill in emails and options:
+       "$VENV/bin/python3" -m accountability_monitor.webui --config "$CONFIG"
+     It opens http://127.0.0.1:8787 in your browser. (You still need a Gmail
+     App Password from https://myaccount.google.com/apppasswords.)
+     Or edit the file by hand:  open -e "$CONFIG"
 
   2. Grant Screen Recording permission:
      System Settings > Privacy & Security > Screen Recording.
