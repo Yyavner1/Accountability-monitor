@@ -1,5 +1,9 @@
 # End User License Agreement (DRAFT)
 
+> NOT IN USE. The project is released free and open-source under the
+> [MIT License](LICENSE). This EULA is kept only for reference in case it is
+> ever offered as a paid product.
+
 > **DRAFT — not legal advice.** This is a starting point written by a
 > non-lawyer. Have a qualified attorney review and finalize it before you
 > distribute or sell this software. Fill in the bracketed placeholders.

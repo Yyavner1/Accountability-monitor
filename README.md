@@ -11,18 +11,27 @@ warns your partner if monitoring ever goes quiet.
 This is consent-based self-monitoring. You install it on machines you own
 and control, and you choose who receives the reports.
 
-## How it's distributed
+## Free & open source
 
-This is **software you download and run yourself**, not a service someone
-else operates. Everything runs on your own device: screenshots are analyzed
-locally and never leave your machine, and alerts are emailed **directly from
-your device to your partner**. No central server receives, processes, or
-stores your activity or images. (A dashboard backend exists in
-[`server/`](server/) but is entirely optional and self-hosted — see its
-note; it is not required and is not run by the people distributing this.)
+This is **free, open-source software** ([MIT](LICENSE)) that you download and
+run yourself — not a service anyone operates. Everything runs on your own
+device: screenshots are analyzed locally and never leave your machine, and
+alerts are emailed **directly from your device to your partner**. No central
+server receives, processes, or stores your activity or images. (A dashboard
+backend exists in [`server/`](server/) but is entirely optional and
+self-hosted — see its note.)
 
-See [`EULA.md`](EULA.md), [`PRIVACY.md`](PRIVACY.md), and, if you intend to
-sell it, [`SELLING.md`](SELLING.md).
+### Responsible use
+
+Install it only on devices you own or are authorized to administer, with the
+knowledge and consent of anyone who uses them. Don't use it to monitor anyone
+secretly or unlawfully. It's provided "as is", with no warranty, and
+detection is best-effort — see the [LICENSE](LICENSE).
+
+> The [`EULA.md`](EULA.md), [`PRIVACY.md`](PRIVACY.md), and [`SELLING.md`](SELLING.md)
+> drafts are kept only for reference if this is ever offered as a paid product.
+> They do **not** apply to the free open-source release, which is governed by
+> the MIT License above.
 
 ## How it works
 

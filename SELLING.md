@@ -1,5 +1,9 @@
 # Selling it safely (distribute-only model)
 
+> NOT IN USE. The project is currently released free and open-source under the
+> [MIT License](LICENSE). This guide is kept for reference if you later decide
+> to sell a paid version.
+
 > Not legal or tax advice. This is practical orientation; confirm specifics
 > with a lawyer and an accountant for your situation.
 
