@@ -150,7 +150,9 @@ def first_run() -> int:
     cfg = ensure_config()
     setup_autostart()
     # Open the settings page so the user can fill things in.
-    from . import webui
+    # Absolute import (not relative): when frozen by PyInstaller this file runs as
+    # __main__ with no parent package, so `from . import webui` would fail.
+    from accountability_monitor import webui
 
     print("Accountability Monitor is set up. Opening the settings page...")
     return webui.main(["--config", str(cfg)])
@@ -161,10 +163,10 @@ def main(argv: list[str] | None = None) -> int:
     sub = argv[0] if argv else ""
     cfg = str(config_path())
     if sub == "monitor":
-        from . import monitor
+        from accountability_monitor import monitor
         return monitor.main(["--config", cfg, *argv[1:]])
     if sub == "settings":
-        from . import webui
+        from accountability_monitor import webui
         return webui.main(["--config", cfg, *argv[1:]])
     # No subcommand: first-run / open settings.
     return first_run()
