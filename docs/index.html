@@ -358,6 +358,12 @@
       <div><dt>Is it really free?</dt>
         <dd>Yes. It's open-source under the MIT license, and the full code is public on GitHub.
           There's nothing to buy and no account to make.</dd></div>
+      <div><dt>My browser or Mac says it might be dangerous &mdash; is it?</dt>
+        <dd>No. New apps that aren't yet code-signed always trigger that warning, because
+          the system doesn't recognize them yet, not because anything's wrong. The full code
+          is public on GitHub for anyone to inspect. In your browser choose <strong>Keep</strong>;
+          on a Mac, right-click the app and choose <strong>Open</strong>; on Windows, click
+          <strong>More info &rarr; Run anyway</strong>.</dd></div>
       <div><dt>Why do I have to open the file myself?</dt>
         <dd>No website is allowed to run a program on your computer on its own — that's the
           main way viruses would spread, so every browser blocks it. Opening the download
@@ -392,7 +398,7 @@
       label: "macOS", icon: MAC_ICON, file: "accountability-monitor-macos.zip", size: "~97 MB",
       steps: [
         { h: "Download the app", download: true,
-          b: "Click below. Safari usually unzips it for you into your Downloads folder." },
+          b: "Click below. Safari usually unzips it into your Downloads folder. If your browser says the file is uncommon or asks you to confirm, choose <strong>Keep</strong> &mdash; that only means it's brand new, not that anything's wrong." },
         { h: "Open it", action: "Mark as done",
           b: "Double-click the app. The first time, hold <strong>Control</strong>, click the app, and choose <strong>Open</strong> — macOS asks once because it isn't code-signed yet. It then arranges to start quietly every time you log in." },
         { h: "Fill in your settings", action: "Mark as done",
@@ -405,7 +411,7 @@
       label: "Windows", icon: WIN_ICON, file: "accountability-monitor-windows.zip", size: "~99 MB",
       steps: [
         { h: "Download the app", download: true,
-          b: "Click below, then right-click the downloaded file and choose <strong>Extract All</strong>." },
+          b: "Click below. If Edge or Chrome blocks it with “can't be downloaded securely” or “may be dangerous,” click the <strong>⋯</strong> next to it in the downloads bar and choose <strong>Keep</strong> &rarr; <strong>Keep anyway</strong> &mdash; the warning only means it's new. Then right-click the file and choose <strong>Extract All</strong>." },
         { h: "Open it", action: "Mark as done",
           b: "Open the app inside the folder. Windows shows a blue <strong>“Windows protected your PC”</strong> box the first time — click <strong>More info → Run anyway</strong>. That only happens once, and it then starts itself every time you log in." },
         { h: "Fill in your settings", action: "Mark as done",
