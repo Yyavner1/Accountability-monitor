@@ -362,8 +362,8 @@
         <dd>No. New apps that aren't yet code-signed always trigger that warning, because
           the system doesn't recognize them yet, not because anything's wrong. The full code
           is public on GitHub for anyone to inspect. In your browser choose <strong>Keep</strong>;
-          on a Mac, right-click the app and choose <strong>Open</strong>; on Windows, click
-          <strong>More info &rarr; Run anyway</strong>.</dd></div>
+          on a Mac, open <strong>System Settings &rarr; Privacy &amp; Security</strong> and click
+          <strong>Open Anyway</strong>; on Windows, click <strong>More info &rarr; Run anyway</strong>.</dd></div>
       <div><dt>Why do I have to open the file myself?</dt>
         <dd>No website is allowed to run a program on your computer on its own — that's the
           main way viruses would spread, so every browser blocks it. Opening the download
@@ -400,7 +400,7 @@
         { h: "Download the app", download: true,
           b: "Click below. Safari usually unzips it into your Downloads folder. If your browser says the file is uncommon or asks you to confirm, choose <strong>Keep</strong> &mdash; that only means it's brand new, not that anything's wrong." },
         { h: "Open it", action: "Mark as done",
-          b: "Double-click the app. The first time, hold <strong>Control</strong>, click the app, and choose <strong>Open</strong> — macOS asks once because it isn't code-signed yet. It then arranges to start quietly every time you log in." },
+          b: "Double-click the app. The first time, macOS says it “can't verify” it (because it's new, not code-signed yet) — click <strong>Done</strong>, then open <strong>System Settings &rarr; Privacy &amp; Security</strong>, scroll to <strong>Security</strong>, and click <strong>Open Anyway</strong> next to the app's name. Confirm with Touch ID. You only do this once; after that it opens normally and starts quietly every time you log in." },
         { h: "Fill in your settings", action: "Mark as done",
           b: "A settings page opens in your browser on its own. Enter your partner's email, your email, how often you want summaries, and your Gmail App Password (see the tip below). Press <strong>Send test email</strong> to confirm it works." },
         { h: "Allow it to see the screen", action: "I turned it on",
