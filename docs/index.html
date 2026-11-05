@@ -11,19 +11,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
   /* Layout: a quiet editorial column — pine-and-paper palette, a schematic hero that shows
-     the real mechanism (screen → on-device check → blurred note to a partner), numbered setup. */
+     the real mechanism, then a guided, OS-aware setup wizard. */
   :root {
-    --bg: #f3f1ea;           /* warm paper, cooled slightly off the cliché cream */
-    --surface: #fbfaf6;
-    --surface-2: #eceae1;
-    --ink: #1a211c;
-    --muted: #5b675e;
-    --line: #ddd9cd;
-    --pine: #12503c;         /* brand green, deep */
-    --pine-bright: #1c7a56;
-    --accent-soft: #e2eee6;
-    --amber: #9a5a12;        /* warning / the-one-step signal */
-    --amber-soft: #f3e7d2;
+    --bg: #f3f1ea; --surface: #fbfaf6; --surface-2: #eceae1;
+    --ink: #1a211c; --muted: #5b675e; --line: #ddd9cd;
+    --pine: #12503c; --pine-bright: #1c7a56; --accent-soft: #e2eee6;
+    --amber: #9a5a12; --amber-soft: #f3e7d2;
     --display: "Fraunces", Georgia, "Times New Roman", serif;
     --body: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -56,7 +49,6 @@
   .wrap { max-width: 920px; margin: 0 auto;
     padding-left: max(22px, env(safe-area-inset-left, 0px));
     padding-right: max(22px, env(safe-area-inset-right, 0px)); }
-  .narrow { max-width: 680px; }
 
   a { color: var(--pine-bright); }
   h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.12;
@@ -65,7 +57,6 @@
   .eyebrow { font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--pine-bright); font-weight: 600; margin: 0; }
 
-  /* ---- top bar ---- */
   header.nav { display: flex; justify-content: space-between; align-items: center;
     padding-block: 20px; gap: 12px; flex-wrap: wrap; }
   .brand { display: inline-flex; align-items: center; gap: 10px;
@@ -76,18 +67,18 @@
   nav.links a { color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; }
   nav.links a:hover { color: var(--pine-bright); }
 
-  .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--pine);
-    color: #fbfaf6; padding: 12px 20px; border-radius: 10px; text-decoration: none;
-    font-weight: 600; font-size: 15px; border: 1px solid transparent;
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--pine); color: #fbfaf6; padding: 12px 20px; border-radius: 10px;
+    text-decoration: none; font-weight: 600; font-size: 15px; border: 1px solid transparent;
+    cursor: pointer; font-family: var(--body);
     transition: transform .12s ease, background .12s ease; }
   .btn:hover { background: var(--pine-bright); transform: translateY(-1px); }
-  .btn.ghost { background: transparent; color: var(--pine-bright);
-    border-color: var(--line); }
+  .btn.ghost { background: transparent; color: var(--pine-bright); border-color: var(--line); }
   .btn.ghost:hover { background: var(--surface); border-color: var(--pine-bright); }
   :root[data-theme="dark"] .btn, :root:not([data-theme="light"]) .btn { color: #0e120f; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn { color: #0e120f; } }
+  :root[data-theme="dark"] .btn.ghost, :root:not([data-theme="light"]) .btn.ghost { color: var(--pine-bright); }
 
-  /* ---- hero ---- */
   .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 44px;
     align-items: center; padding-block: 40px 56px; }
   .hero h1 { font-size: clamp(36px, 6.2vw, 58px); font-weight: 600; }
@@ -96,23 +87,16 @@
   .pledge { margin-top: 24px; display: inline-flex; align-items: center; gap: 9px;
     background: var(--accent-soft); color: var(--pine-bright); padding: 9px 15px;
     border-radius: 999px; font-size: 13.5px; font-weight: 600; }
-  .pledge .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--pine-bright);
-    box-shadow: 0 0 0 0 var(--pine-bright); animation: pulse 2.6s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(28,122,86,.45); }
-    70% { box-shadow: 0 0 0 7px rgba(28,122,86,0); } 100% { box-shadow: 0 0 0 0 rgba(28,122,86,0); } }
-  @media (prefers-reduced-motion: reduce) { .pledge .pulse { animation: none; } }
+  .pledge .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--pine-bright); }
   .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; align-items: center; }
   .cta-row .lic { font-size: 13.5px; color: var(--muted); }
-
   .hero-art { width: 100%; height: auto; filter: drop-shadow(var(--shadow)); }
 
-  /* ---- generic section ---- */
   section { padding-block: 44px; border-top: 1px solid var(--line); }
   section > .eyebrow { margin-bottom: 10px; }
   section h2 { font-size: clamp(25px, 4vw, 34px); }
   .lead-p { color: var(--muted); margin-top: 14px; max-width: 62ch; font-size: 16.5px; }
 
-  /* ---- three layers ---- */
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
     padding: 22px; box-shadow: var(--shadow); }
@@ -120,37 +104,67 @@
   .card h3 { font-family: var(--body); font-size: 16.5px; font-weight: 700; margin-top: 14px; }
   .card p { margin: 8px 0 0; font-size: 14.5px; color: var(--muted); line-height: 1.55; }
 
-  /* ---- download ---- */
-  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 26px; }
-  .dl { display: flex; flex-direction: column; gap: 4px; text-decoration: none;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
-    padding: 20px; color: var(--ink); box-shadow: var(--shadow);
-    transition: transform .12s ease, border-color .12s ease; }
-  .dl:hover { transform: translateY(-2px); border-color: var(--pine-bright); }
-  .dl .os-ic { width: 30px; height: 30px; color: var(--pine-bright); margin-bottom: 8px; }
-  .dl .os { font-weight: 700; font-size: 16px; }
-  .dl .meta { font-size: 13px; color: var(--muted); }
-  .dl .go { margin-top: 10px; font-size: 13.5px; font-weight: 600; color: var(--pine-bright); }
-  .dl-note { font-size: 13.5px; color: var(--muted); margin-top: 16px; max-width: 64ch; }
+  /* ---- guided wizard ---- */
+  .wizard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); overflow: hidden; margin-top: 26px; }
+  .wiz-head { display: flex; justify-content: space-between; align-items: center;
+    gap: 14px; flex-wrap: wrap; padding: 20px 24px; border-bottom: 1px solid var(--line);
+    background: var(--surface-2); }
+  .os-badge { display: inline-flex; align-items: center; gap: 9px; font-weight: 700;
+    font-size: 16px; }
+  .os-badge svg { width: 22px; height: 22px; color: var(--pine-bright); }
+  .os-switch { font-size: 13.5px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+  .os-switch button { background: none; border: none; color: var(--pine-bright);
+    font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 4px 8px;
+    border-radius: 7px; }
+  .os-switch button:hover { background: var(--accent-soft); }
+  .os-switch button[aria-current="true"] { background: var(--pine); color: #fbfaf6; }
+  :root[data-theme="dark"] .os-switch button[aria-current="true"],
+  :root:not([data-theme="light"]) .os-switch button[aria-current="true"] { color: #0e120f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .os-switch button[aria-current="true"] { color: #0e120f; } }
 
-  /* ---- steps ---- */
-  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 28px 0 0;
-    display: flex; flex-direction: column; gap: 22px; }
-  ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr;
-    gap: 18px; align-items: start; }
-  ol.steps > li::before { content: counter(s); font-family: var(--display);
-    font-weight: 600; color: var(--pine-bright); background: var(--accent-soft);
-    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
-    font-size: 19px; }
-  ol.steps h3 { font-family: var(--body); font-size: 17px; font-weight: 700; }
-  ol.steps p { margin: 7px 0 0; color: var(--muted); font-size: 15px; min-width: 0; }
+  .progress { height: 4px; background: var(--surface-2); }
+  .progress > span { display: block; height: 100%; width: 0; background: var(--pine-bright);
+    transition: width .35s ease; }
+
+  ol.wsteps { list-style: none; counter-reset: s; padding: 10px 0; margin: 0; }
+  ol.wsteps > li { counter-increment: s; display: grid; grid-template-columns: 52px 1fr;
+    gap: 6px 4px; padding: 14px 24px; align-items: start; position: relative; }
+  ol.wsteps > li .num { grid-row: 1 / span 2; width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--display); font-weight: 600;
+    font-size: 16px; background: var(--surface-2); color: var(--muted);
+    border: 1px solid var(--line); transition: all .2s ease; }
+  ol.wsteps > li[data-state="active"] .num { background: var(--accent-soft);
+    color: var(--pine-bright); border-color: var(--pine-bright); }
+  ol.wsteps > li[data-state="done"] .num { background: var(--pine); color: #fbfaf6;
+    border-color: var(--pine); }
+  :root[data-theme="dark"] ol.wsteps > li[data-state="done"] .num,
+  :root:not([data-theme="light"]) ol.wsteps > li[data-state="done"] .num { color: #0e120f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) ol.wsteps > li[data-state="done"] .num { color: #0e120f; } }
+  ol.wsteps > li .num .tick { width: 17px; height: 17px; display: none; }
+  ol.wsteps > li[data-state="done"] .num .tick { display: block; }
+  ol.wsteps > li[data-state="done"] .num .dig { display: none; }
+  ol.wsteps h3 { font-family: var(--body); font-size: 16.5px; font-weight: 700; }
+  ol.wsteps .body { color: var(--muted); font-size: 14.8px; min-width: 0; }
+  ol.wsteps .body p { margin: 6px 0 0; }
+  ol.wsteps li[data-state="pending"] .body { opacity: .55; }
+  .step-actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .dl-btn { font-size: 15px; }
+  .dl-sub { font-size: 12.8px; color: var(--muted); }
+  .linkish { background: none; border: none; color: var(--pine-bright); font: inherit;
+    font-weight: 600; cursor: pointer; padding: 10px 0; text-decoration: underline;
+    text-underline-offset: 3px; }
   pre { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
-    padding: 13px 15px; overflow-x: auto; margin: 12px 0 0; }
+    padding: 12px 14px; overflow-x: auto; margin: 10px 0 0; }
   pre code { color: var(--ink); line-height: 1.5; }
+  .done-banner { margin: 4px 24px 22px; padding: 16px 18px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--pine-bright); font-weight: 600;
+    display: flex; gap: 10px; align-items: center; }
+  .done-banner svg { width: 20px; height: 20px; flex: none; }
 
-  .callout { border-radius: 14px; padding: 20px 22px; margin-top: 24px;
-    display: grid; grid-template-columns: 26px 1fr; gap: 14px; }
-  .callout .ci { width: 24px; height: 24px; }
+  .callout { border-radius: 14px; padding: 18px 20px; margin-top: 22px;
+    display: grid; grid-template-columns: 24px 1fr; gap: 13px; }
+  .callout .ci { width: 22px; height: 22px; }
   .callout.tip { background: var(--accent-soft); }
   .callout.tip .ci { color: var(--pine-bright); }
   .callout.warn { background: var(--amber-soft); }
@@ -159,7 +173,6 @@
   .callout.warn h3 { color: var(--amber); }
   .callout p { margin: 6px 0 0; font-size: 14.5px; }
 
-  /* ---- privacy band ---- */
   .band { background: var(--pine); color: #f3f1ea; border-radius: 20px; padding: 40px;
     margin-block: 8px; }
   .band .eyebrow { color: #a8d8c3; }
@@ -167,7 +180,6 @@
   .band p { color: #d7e4db; margin-top: 14px; max-width: 60ch; font-size: 16.5px; }
   .band a { color: #fbfaf6; }
 
-  /* ---- faq ---- */
   dl.faq { margin: 22px 0 0; display: grid; gap: 2px; }
   dl.faq > div { border-top: 1px solid var(--line); padding-block: 18px; }
   dl.faq dt { font-weight: 700; font-size: 16px; }
@@ -182,9 +194,10 @@
     .hero { grid-template-columns: 1fr; gap: 32px; padding-block: 24px 44px; }
     .hero-art { max-width: 420px; }
     .grid3 { grid-template-columns: 1fr; }
-    .dl-grid { grid-template-columns: 1fr; }
     nav.links .nav-text { display: none; }
     .band { padding: 28px; border-radius: 16px; }
+    ol.wsteps > li { padding: 14px 18px; grid-template-columns: 44px 1fr; }
+    .wiz-head { padding: 18px; }
   }
 </style>
 </head>
@@ -194,17 +207,15 @@
   <header class="nav">
     <a class="brand" href="#top">
       <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2 4 5v6c0 4.5 3.2 8.3 8 9.9 4.8-1.6 8-5.4 8-9.9V5l-8-3Z"
-          fill="currentColor" color="var(--pine)"/>
-        <path d="m8.5 12 2.4 2.4L15.8 9.5" stroke="#fbfaf6" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 2 4 5v6c0 4.5 3.2 8.3 8 9.9 4.8-1.6 8-5.4 8-9.9V5l-8-3Z" fill="currentColor" color="var(--pine)"/>
+        <path d="m8.5 12 2.4 2.4L15.8 9.5" stroke="#fbfaf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Accountability Monitor
     </a>
     <nav class="links">
       <a href="#how"><span class="nav-text">How it works</span></a>
-      <a href="#setup"><span class="nav-text">Setup</span></a>
-      <a class="btn ghost" href="#download">Download</a>
+      <a href="#start"><span class="nav-text">Get started</span></a>
+      <a class="btn ghost" href="#start">Download</a>
     </nav>
   </header>
 
@@ -217,69 +228,46 @@
         nothing sent to us. Because there is no us.</p>
       <span class="pledge"><span class="pulse"></span> Runs on your device · no server · we never see your screen</span>
       <div class="cta-row">
-        <a class="btn" href="#download">Download free</a>
-        <a class="btn ghost" href="#setup">See how to set it up</a>
+        <a class="btn" href="#start">Get started free</a>
+        <a class="btn ghost" href="#how">How it works</a>
       </div>
-      <p class="cta-row lic" style="margin-top:14px;">MIT license · macOS, Windows &amp; Linux</p>
+      <p class="cta-row lic" style="margin-top:14px;">MIT license · macOS &amp; Windows</p>
     </div>
 
     <svg class="hero-art" viewBox="0 0 360 300" role="img"
-      aria-label="A screen is checked on your own computer, then a blurred note goes to your partner.">
+      aria-label="Your screen is checked on your own computer, then a blurred note goes to your partner.">
       <defs>
         <linearGradient id="scr" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="var(--surface)"/>
-          <stop offset="1" stop-color="var(--surface-2)"/>
+          <stop offset="0" stop-color="var(--surface)"/><stop offset="1" stop-color="var(--surface-2)"/>
         </linearGradient>
         <filter id="blur"><feGaussianBlur stdDeviation="4.5"/></filter>
       </defs>
-
-      <!-- laptop -->
-      <rect x="40" y="30" width="200" height="132" rx="12" fill="url(#scr)"
-        stroke="var(--line)" stroke-width="1.5"/>
+      <rect x="40" y="30" width="200" height="132" rx="12" fill="url(#scr)" stroke="var(--line)" stroke-width="1.5"/>
       <rect x="40" y="30" width="200" height="22" rx="12" fill="var(--surface-2)"/>
-      <circle cx="54" cy="41" r="3" fill="var(--line)"/>
-      <circle cx="64" cy="41" r="3" fill="var(--line)"/>
-      <circle cx="74" cy="41" r="3" fill="var(--line)"/>
-      <!-- content tiles -->
+      <circle cx="54" cy="41" r="3" fill="var(--line)"/><circle cx="64" cy="41" r="3" fill="var(--line)"/><circle cx="74" cy="41" r="3" fill="var(--line)"/>
       <rect x="56" y="64" width="78" height="54" rx="7" fill="var(--accent-soft)"/>
       <rect x="66" y="74" width="40" height="6" rx="3" fill="var(--pine-bright)" opacity=".7"/>
       <rect x="66" y="86" width="56" height="5" rx="2.5" fill="var(--line)"/>
       <rect x="66" y="96" width="48" height="5" rx="2.5" fill="var(--line)"/>
-      <!-- flagged + blurred tile -->
       <g filter="url(#blur)">
         <rect x="146" y="64" width="78" height="54" rx="7" fill="var(--amber)" opacity=".55"/>
         <circle cx="175" cy="86" r="13" fill="var(--amber-soft)"/>
         <rect x="150" y="100" width="64" height="12" rx="6" fill="var(--amber)" opacity=".4"/>
       </g>
-      <rect x="146" y="64" width="78" height="54" rx="7" fill="none"
-        stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 4"/>
-      <!-- laptop base -->
+      <rect x="146" y="64" width="78" height="54" rx="7" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="4 4"/>
       <path d="M30 162h220l12 16H18l12-16Z" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/>
-
-      <!-- shield check (on-device) -->
       <g transform="translate(150 196)">
-        <path d="M30 2 10 9v16c0 11.5 8 21 20 25 12-4 20-13.5 20-25V9L30 2Z"
-          fill="var(--pine)"/>
-        <path d="m21 30 6 6 13-14" stroke="#fbfaf6" stroke-width="3"
-          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M30 2 10 9v16c0 11.5 8 21 20 25 12-4 20-13.5 20-25V9L30 2Z" fill="var(--pine)"/>
+        <path d="m21 30 6 6 13-14" stroke="#fbfaf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </g>
-      <text x="180" y="276" text-anchor="middle" font-family="IBM Plex Sans, sans-serif"
-        font-size="11.5" font-weight="600" fill="var(--muted)">checked on your machine</text>
-
-      <!-- envelope to partner -->
+      <text x="180" y="276" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" font-weight="600" fill="var(--muted)">checked on your machine</text>
       <g transform="translate(276 92)">
-        <rect x="0" y="0" width="72" height="50" rx="8" fill="var(--surface)"
-          stroke="var(--line)" stroke-width="1.5"/>
-        <path d="M4 6l32 24L68 6" fill="none" stroke="var(--pine-bright)" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="36" y="68" text-anchor="middle" font-family="IBM Plex Sans, sans-serif"
-          font-size="11.5" font-weight="600" fill="var(--muted)">to your partner</text>
+        <rect x="0" y="0" width="72" height="50" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
+        <path d="M4 6l32 24L68 6" fill="none" stroke="var(--pine-bright)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="36" y="68" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11.5" font-weight="600" fill="var(--muted)">to your partner</text>
       </g>
-      <!-- arrow screen->envelope -->
-      <path d="M244 100h26" stroke="var(--pine-bright)" stroke-width="1.8"
-        stroke-linecap="round" stroke-dasharray="3 5"/>
-      <path d="m268 96 6 4-6 4" fill="none" stroke="var(--pine-bright)" stroke-width="1.8"
-        stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M244 100h26" stroke="var(--pine-bright)" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 5"/>
+      <path d="m268 96 6 4-6 4" fill="none" stroke="var(--pine-bright)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </div>
 
@@ -290,20 +278,17 @@
       slips through, and report the rest to the person you've asked to keep you honest.</p>
     <div class="grid3">
       <div class="card">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m5 5 14 14"/></svg>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m5 5 14 14"/></svg>
         <h3>Blocks adult sites</h3>
         <p>A system-wide filter stops known adult sites from loading in any browser or app.</p>
       </div>
       <div class="card">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><path d="M8.5 9.5a4 4 0 0 0 6.2 5"/><path d="m4 4 16 16"/></svg>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><path d="M8.5 9.5a4 4 0 0 0 6.2 5"/><path d="m4 4 16 16"/></svg>
         <h3>Blurs explicit images</h3>
         <p>A browser add-on blurs explicit images and video right on the page, as they load.</p>
       </div>
       <div class="card">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
         <h3>Watches the whole screen</h3>
         <p>For everything else, it checks the screen on your machine and reports flagged
           moments to your partner — with an alert if you try to switch it off.</p>
@@ -311,89 +296,45 @@
     </div>
   </section>
 
-  <section id="download">
-    <p class="eyebrow">Download · one file, nothing to install first</p>
-    <h2>Get it for your computer</h2>
-    <p class="lead-p">Pick your system. Everything it needs is bundled in — no Python, no
-      setup before you start. Unzip it and open the app.</p>
-    <div class="dl-grid">
-      <a class="dl" href="https://github.com/yyavner1/accountability-monitor/releases/latest/download/accountability-monitor-macos.zip">
-        <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.7 2.2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7c1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.2-2.4 1.2-2.4-.1 0-2.3-.9-2.4-3.5ZM14 5.9c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.3-.6.7-1.1 1.7-1 2.7 1 .1 2-.5 2.7-1.1Z"/></svg>
-        <span class="os">macOS</span>
-        <span class="meta">Apple Silicon &amp; Intel · ~97 MB</span>
-        <span class="go">Download .zip →</span>
-      </a>
-      <a class="dl" href="https://github.com/yyavner1/accountability-monitor/releases/latest/download/accountability-monitor-windows.zip">
-        <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3V5.5Zm0 13 7.5 1.1v-7H3v5.9Zm8.5 1.2L21 21V12.5h-9.5v7.2Zm0-15.4v7.2H21V3l-9.5 1.3Z"/></svg>
-        <span class="os">Windows</span>
-        <span class="meta">Windows 10 &amp; 11 · ~99 MB</span>
-        <span class="go">Download .zip →</span>
-      </a>
-      <a class="dl" href="https://github.com/yyavner1/accountability-monitor/releases/latest/download/accountability-monitor-linux.zip">
-        <svg class="os-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2 0-3 1.8-3 4 0 1.3.1 2.3-.6 3.4C7.3 11 5.5 13 5.5 15.8c0 .9-.6 1.5-1 2.2-.5.8 0 1.6 1 1.6.6 0 .8.3 1.3.6.9.6 2 .9 1.9-.4 1 .5 2.6.5 3.6 0-.1 1.3 1 1 1.9.4.5-.3.7-.6 1.3-.6 1 0 1.5-.8 1-1.6-.4-.7-1-1.3-1-2.2 0-2.8-1.8-4.8-2.9-6.4-.7-1.1-.6-2.1-.6-3.4 0-2.2-1-4-3-4Zm-1.4 5.3c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9Zm2.8 0c.4 0 .7.4.7.9s-.3.9-.7.9-.7-.4-.7-.9.3-.9.7-.9Z"/></svg>
-        <span class="os">Linux</span>
-        <span class="meta">x86-64 · ~145 MB</span>
-        <span class="go">Download .zip →</span>
-      </a>
+  <section id="start">
+    <p class="eyebrow">Get started · about 10 minutes, once</p>
+    <h2>Set it up, step by step</h2>
+    <p class="lead-p">We've detected your system and lined up just your steps. Do them top to
+      bottom — each one lights up as you finish the one before it.</p>
+
+    <div class="wizard">
+      <div class="wiz-head">
+        <span class="os-badge" id="osBadge"></span>
+        <div class="os-switch">
+          <span>Not right?</span>
+          <button type="button" data-os="mac">macOS</button>
+          <button type="button" data-os="win">Windows</button>
+        </div>
+      </div>
+      <div class="progress"><span id="progFill"></span></div>
+      <ol class="wsteps" id="wsteps"></ol>
+      <div class="done-banner" id="doneBanner" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        You're all set. It's running quietly and will start itself every time you log in.
+      </div>
     </div>
-    <p class="dl-note">The apps aren't code-signed yet, so the first time you open one your
-      system will ask you to confirm: on Mac, right-click the app and choose <strong>Open</strong>;
-      on Windows, click <strong>More info → Run anyway</strong>. That only happens once.</p>
-  </section>
 
-  <section id="setup">
-    <p class="eyebrow">Setup · about 10 minutes, once</p>
-    <h2>Getting it running on a Mac</h2>
-    <ol class="steps">
-      <li>
-        <div>
-          <h3>Open the app</h3>
-          <p>Unzip the download and open the app. The first time, it sets itself up and
-            arranges to start quietly every time you log in — no Terminal needed.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Fill in your settings page</h3>
-          <p>It opens a simple settings page in your browser. Enter your accountability
-            partner's email, your own email, and how often you'd like summaries. A
-            <strong>Send test email</strong> button lets you confirm it works before you rely on it.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Create a Gmail App Password</h3>
-          <p>So it can send email from your account, make a one-time App Password and paste
-            it into the settings page.</p>
-          <pre><code>myaccount.google.com/apppasswords</code></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Allow it to see the screen</h3>
-          <p>In <strong>System Settings → Privacy &amp; Security → Screen Recording</strong>,
-            turn it on for the app. Without this, the screenshots come out blank.</p>
-        </div>
-      </li>
-    </ol>
-
-    <div class="callout warn">
-      <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+    <div class="callout warn" id="macPermCallout">
+      <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
       <div>
         <h3>The one step people miss</h3>
-        <p>Step 4, the Screen Recording permission. If your partner's reports come back empty
-          or all-black, that permission isn't on yet — turn it on and reopen the app.</p>
+        <p>The Screen Recording permission. If your partner's reports come back empty or
+          all-black, that permission isn't on yet — turn it on and reopen the app.</p>
       </div>
     </div>
 
     <div class="callout tip">
-      <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/></svg>
+      <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/></svg>
       <div>
-        <h3>Windows &amp; Linux work the same way</h3>
-        <p>Open the app for your system; the settings page and everything after it are
-          identical. The only Mac-specific part is the Screen Recording permission above.</p>
+        <h3>About that Gmail App Password</h3>
+        <p>It's a one-time code that lets the app send email from your account without your real
+          password. Go to <span class="mono">myaccount.google.com/apppasswords</span>, make one
+          called "Accountability", and paste it into the settings page.</p>
       </div>
     </div>
   </section>
@@ -417,9 +358,10 @@
       <div><dt>Is it really free?</dt>
         <dd>Yes. It's open-source under the MIT license, and the full code is public on GitHub.
           There's nothing to buy and no account to make.</dd></div>
-      <div><dt>Can I just remove it myself?</dt>
-        <dd>You're the admin of your own computer, so yes — but disabling or removing it sends
-          an alert to your partner. It's built to make slipping unnoticed hard, not impossible.</dd></div>
+      <div><dt>Why do I have to open the file myself?</dt>
+        <dd>No website is allowed to run a program on your computer on its own — that's the
+          main way viruses would spread, so every browser blocks it. Opening the download
+          yourself is the one click that can't be skipped. Everything after it is guided.</dd></div>
       <div><dt>Does it catch everything?</dt>
         <dd>No tool does. It blocks a lot, blurs more, and reports the rest. The detection runs
           on-device and is best-effort — the honest trade for keeping everything private.</dd></div>
@@ -436,6 +378,137 @@
       who uses them.</div>
   </footer>
 </div>
+
+<script>
+(function () {
+  "use strict";
+  var REL = "https://github.com/yyavner1/accountability-monitor/releases/latest/download/";
+  var MAC_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.7 2.2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7c1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.2-2.4 1.2-2.4-.1 0-2.3-.9-2.4-3.5ZM14 5.9c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.3-.6.7-1.1 1.7-1 2.7 1 .1 2-.5 2.7-1.1Z"/></svg>';
+  var WIN_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.4v7.1H3V5.5Zm0 13 7.5 1.1v-7H3v5.9Zm8.5 1.2L21 21V12.5h-9.5v7.2Zm0-15.4v7.2H21V3l-9.5 1.3Z"/></svg>';
+  var TICK = '<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  var PLANS = {
+    mac: {
+      label: "macOS", icon: MAC_ICON, file: "accountability-monitor-macos.zip", size: "~97 MB",
+      steps: [
+        { h: "Download the app", download: true,
+          b: "Click below. Safari usually unzips it for you into your Downloads folder." },
+        { h: "Open it", action: "Mark as done",
+          b: "Double-click the app. The first time, hold <strong>Control</strong>, click the app, and choose <strong>Open</strong> — macOS asks once because it isn't code-signed yet. It then arranges to start quietly every time you log in." },
+        { h: "Fill in your settings", action: "Mark as done",
+          b: "A settings page opens in your browser on its own. Enter your partner's email, your email, how often you want summaries, and your Gmail App Password (see the tip below). Press <strong>Send test email</strong> to confirm it works." },
+        { h: "Allow it to see the screen", action: "I turned it on",
+          b: "Open <strong>System Settings → Privacy &amp; Security → Screen Recording</strong> and turn it on for the app, then reopen it. Without this, the screenshots come out blank." }
+      ]
+    },
+    win: {
+      label: "Windows", icon: WIN_ICON, file: "accountability-monitor-windows.zip", size: "~99 MB",
+      steps: [
+        { h: "Download the app", download: true,
+          b: "Click below, then right-click the downloaded file and choose <strong>Extract All</strong>." },
+        { h: "Open it", action: "Mark as done",
+          b: "Open the app inside the folder. Windows shows a blue <strong>“Windows protected your PC”</strong> box the first time — click <strong>More info → Run anyway</strong>. That only happens once, and it then starts itself every time you log in." },
+        { h: "Fill in your settings", action: "Mark as done",
+          b: "A settings page opens in your browser on its own. Enter your partner's email, your email, how often you want summaries, and your Gmail App Password (see the tip below). Press <strong>Send test email</strong> to confirm it works." }
+      ]
+    }
+  };
+
+  var state = { os: "mac", done: 0 };
+
+  function detectOS() {
+    var s = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || "").toLowerCase();
+    if (s.indexOf("win") !== -1) return "win";
+    return "mac"; // default for Mac, Linux and anything unknown — Mac is the common case here
+  }
+
+  var elSteps = document.getElementById("wsteps");
+  var elBadge = document.getElementById("osBadge");
+  var elProg = document.getElementById("progFill");
+  var elDone = document.getElementById("doneBanner");
+  var elMacCallout = document.getElementById("macPermCallout");
+
+  function render() {
+    var plan = PLANS[state.os];
+    elBadge.innerHTML = plan.icon + "<span>Setup for " + plan.label + "</span>";
+    elMacCallout.hidden = state.os !== "mac";
+    document.querySelectorAll(".os-switch button").forEach(function (b) {
+      b.setAttribute("aria-current", b.getAttribute("data-os") === state.os ? "true" : "false");
+    });
+
+    elSteps.innerHTML = "";
+    plan.steps.forEach(function (step, i) {
+      var li = document.createElement("li");
+      var st = i < state.done ? "done" : (i === state.done ? "active" : "pending");
+      li.setAttribute("data-state", st);
+
+      var num = document.createElement("span");
+      num.className = "num";
+      num.innerHTML = '<span class="dig">' + (i + 1) + "</span>" + TICK;
+      li.appendChild(num);
+
+      var wrapEl = document.createElement("div");
+      var h = document.createElement("h3");
+      h.textContent = step.h;
+      var body = document.createElement("div");
+      body.className = "body";
+      body.innerHTML = "<p>" + step.b + "</p>";
+
+      if (st === "active") {
+        var actions = document.createElement("div");
+        actions.className = "step-actions";
+        if (step.download) {
+          var a = document.createElement("a");
+          a.className = "btn dl-btn";
+          a.href = REL + plan.file;
+          a.innerHTML = plan.icon.replace('viewBox', 'width="18" height="18" viewBox') + " Download for " + plan.label;
+          a.addEventListener("click", function () { setTimeout(advance, 400); });
+          actions.appendChild(a);
+          var sub = document.createElement("span");
+          sub.className = "dl-sub";
+          sub.textContent = plan.size + " · free";
+          actions.appendChild(sub);
+        } else {
+          var btn = document.createElement("button");
+          btn.className = "btn ghost";
+          btn.type = "button";
+          btn.textContent = step.action || "Done";
+          btn.addEventListener("click", advance);
+          actions.appendChild(btn);
+          if (i > 0) {
+            var back = document.createElement("button");
+            back.className = "linkish";
+            back.type = "button";
+            back.textContent = "Back";
+            back.addEventListener("click", function () { state.done = Math.max(0, state.done - 1); render(); });
+            actions.appendChild(back);
+          }
+        }
+        body.appendChild(actions);
+      }
+
+      wrapEl.appendChild(h);
+      wrapEl.appendChild(body);
+      li.appendChild(wrapEl);
+      elSteps.appendChild(li);
+    });
+
+    var total = plan.steps.length;
+    var pct = Math.round((state.done / total) * 100);
+    elProg.style.width = pct + "%";
+    elDone.hidden = state.done < total;
+  }
+
+  function advance() { state.done = Math.min(PLANS[state.os].steps.length, state.done + 1); render(); }
+
+  document.querySelectorAll(".os-switch button").forEach(function (b) {
+    b.addEventListener("click", function () { state.os = b.getAttribute("data-os"); state.done = 0; render(); });
+  });
+
+  state.os = detectOS();
+  render();
+})();
+</script>
 
 </body>
 </html>
