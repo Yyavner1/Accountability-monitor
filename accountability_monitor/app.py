@@ -154,7 +154,7 @@ def first_run() -> int:
     # __main__ with no parent package, so `from . import webui` would fail.
     from accountability_monitor import webui
 
-    print("Accountability Monitor is set up. Opening the settings page...")
+    print("Goonmaster 7000 is set up. Opening the settings page...")
     return webui.main(["--config", str(cfg)])
 
 

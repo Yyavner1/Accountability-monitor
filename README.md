@@ -1,4 +1,4 @@
-# Accountability Monitor
+# Goonmaster 7000
 
 A self-hosted accountability tool you install on your own computers
 (macOS, Windows, and Linux). While the device is in use, it captures the

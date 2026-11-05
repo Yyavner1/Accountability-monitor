@@ -139,7 +139,7 @@ def _shell(inner: str) -> str:
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
-        '<title>Accountability Monitor — Settings</title>'
+        '<title>Goonmaster 7000 — Settings</title>'
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
@@ -185,7 +185,7 @@ def render(cfg: dict, saved: bool) -> str:
         '</svg>Saved. Restart the app for changes to take full effect.</div>'
     ) if saved else ""
     inner = (
-        f'<div class="head">{_SHIELD}<h1>Accountability Monitor</h1></div>'
+        f'<div class="head">{_SHIELD}<h1>Goonmaster 7000</h1></div>'
         f'<span class="status"><span class="dot"></span>{html.escape(_status(cfg))}</span>'
         f'{banner}'
         f'<form method="post" action="/save">{"".join(sections)}'
@@ -280,7 +280,7 @@ class Handler(BaseHTTPRequestHandler):
         tone = "ok-soft" if sent_ok else "amber-soft"
         fg = "ok" if sent_ok else "amber"
         inner = (
-            f'<div class="head">{_SHIELD}<h1>Accountability Monitor</h1></div>'
+            f'<div class="head">{_SHIELD}<h1>Goonmaster 7000</h1></div>'
             f'<div class="banner" style="background:var(--{tone});color:var(--{fg})">'
             f'{icon}<span>{html.escape(msg)}</span></div>'
             f'<div class="actions"><a class="btn" href="/">Back to settings</a></div>'

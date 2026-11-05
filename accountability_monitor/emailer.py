@@ -52,9 +52,9 @@ class Emailer:
         msg = EmailMessage()
         msg["From"] = self.sender
         msg["To"] = self.partner
-        msg["Subject"] = "Accountability Monitor: test email"
+        msg["Subject"] = "Goonmaster 7000: test email"
         msg.set_content(
-            "This is a test from your Accountability Monitor settings page.\n"
+            "This is a test from your Goonmaster 7000 settings page.\n"
             "If you received this, your email is set up correctly."
         )
         try:
@@ -68,7 +68,7 @@ class Emailer:
 
     def send_alert(self, reasons: list[str], image_path: str | None) -> bool:
         msg = EmailMessage()
-        msg["Subject"] = "Accountability alert: flagged activity"
+        msg["Subject"] = "Goonmaster 7000 alert: flagged activity"
         body = (
             "The accountability monitor flagged on-screen activity.\n\n"
             "Reasons:\n" + "\n".join(f"  - {r}" for r in reasons) + "\n\n"
@@ -86,13 +86,13 @@ class Emailer:
     def send_summary(self, flagged_count: int, total_captures: int) -> bool:
         msg = EmailMessage()
         if flagged_count == 0:
-            msg["Subject"] = "Accountability summary: all clear"
+            msg["Subject"] = "Goonmaster 7000 summary: all clear"
             body = (
                 f"No flagged activity in the last 24 hours.\n"
                 f"{total_captures} captures were checked."
             )
         else:
-            msg["Subject"] = f"Accountability summary: {flagged_count} flagged"
+            msg["Subject"] = f"Goonmaster 7000 summary: {flagged_count} flagged"
             body = (
                 f"{flagged_count} of {total_captures} captures were flagged "
                 f"in the last 24 hours.\n"
