@@ -181,9 +181,20 @@ class Handler(BaseHTTPRequestHandler):
                 smtp_host=cfg.get("smtp_host", "smtp.gmail.com"),
                 smtp_port=cfg.get("smtp_port", 465),
             )
-            ok = e.send_summary(0, 0)
-            msg = ("Test email sent — check the partner inbox."
-                   if ok else "Could not send. Check the email settings.")
+            ok, err = e.send_test()
+            if ok:
+                msg = "Test email sent — check the partner inbox."
+            else:
+                low = err.lower()
+                if ("username and password not accepted" in low
+                        or "5.7.8" in low or "authentication" in low
+                        or "badcredentials" in low):
+                    msg = ("Gmail rejected the sign-in. Make sure you used a 16-character "
+                           "Gmail App Password (not your normal password), that 2-Step "
+                           "Verification is turned on for that Google account, and that "
+                           "the sender email matches it. Details: " + err)
+                else:
+                    msg = "Could not send: " + err
         except Exception as exc:
             msg = f"Could not send: {exc}"
         self._send(

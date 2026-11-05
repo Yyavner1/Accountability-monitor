@@ -46,6 +46,26 @@ class Emailer:
             log.error("failed to send mail: %s", exc)
             return False
 
+    def send_test(self) -> tuple[bool, str]:
+        """Send a test email, returning (ok, error). Unlike the other senders,
+        this surfaces the real SMTP error so the settings page can show it."""
+        msg = EmailMessage()
+        msg["From"] = self.sender
+        msg["To"] = self.partner
+        msg["Subject"] = "Accountability Monitor: test email"
+        msg.set_content(
+            "This is a test from your Accountability Monitor settings page.\n"
+            "If you received this, your email is set up correctly."
+        )
+        try:
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL(self.host, self.port, context=ctx, timeout=30) as s:
+                s.login(self.sender, self.password)
+                s.send_message(msg)
+            return True, ""
+        except Exception as exc:
+            return False, str(exc)
+
     def send_alert(self, reasons: list[str], image_path: str | None) -> bool:
         msg = EmailMessage()
         msg["Subject"] = "Accountability alert: flagged activity"
