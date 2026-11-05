@@ -71,57 +71,130 @@ def _status(cfg: dict) -> str:
         return "Status unavailable."
 
 
+# Fields grouped into sections for the page (keys reference FIELDS above).
+GROUPS = [
+    ("Email reports", "Who gets the reports, and the account they send from.",
+     ["partner_email", "sender_email", "smtp_password", "summary_frequency"]),
+    ("Detection", "How often it checks and what counts as flagged.",
+     ["capture_interval_seconds", "nsfw_score_threshold", "blur_flagged_captures"]),
+    ("Extra safeguards", "Optional checks. Leave as-is if you're not sure.",
+     ["watch_site_filter", "healthcheck_url"]),
+]
+_FIELD_BY_KEY = {k: (k, l, kind, d) for (k, l, kind, d) in FIELDS}
+
+# Mirrors the landing page: pine-and-paper palette, Fraunces + IBM Plex, theme-aware.
+PAGE_CSS = """
+:root{--bg:#f3f1ea;--surface:#fbfaf6;--surface-2:#eceae1;--ink:#1a211c;--muted:#5b675e;
+ --line:#ddd9cd;--pine:#12503c;--pine-bright:#1c7a56;--accent-soft:#e2eee6;
+ --amber:#9a5a12;--amber-soft:#f3e7d2;--ok:#176a45;--ok-soft:#dcefe3;
+ --display:"Fraunces",Georgia,serif;--body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;}
+@media(prefers-color-scheme:dark){:root{--bg:#0e120f;--surface:#161b16;--surface-2:#1d231d;
+ --ink:#e9ece4;--muted:#9aa89d;--line:#2a312a;--pine:#4fbd90;--pine-bright:#6bd2a6;
+ --accent-soft:#15241d;--amber:#e0a856;--amber-soft:#2a2114;--ok:#6bd2a6;--ok-soft:#15241d;
+ color-scheme:dark;}}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;
+ margin:0;padding:32px max(16px,env(safe-area-inset-left,0)) 56px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:600px;margin:0 auto;}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.head svg{width:30px;height:30px;flex:none;}
+.head h1{font-family:var(--display);font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em;}
+.status{display:inline-flex;align-items:center;gap:8px;background:var(--surface);
+ border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;
+ color:var(--muted);margin:8px 0 22px;}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--pine-bright);flex:none;}
+.banner{display:flex;gap:10px;align-items:flex-start;background:var(--ok-soft);color:var(--ok);
+ border-radius:12px;padding:13px 16px;margin-bottom:20px;font-size:14px;font-weight:500;}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;}
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+ padding:22px 22px 8px;margin-bottom:18px;}
+.sect>h2{font-family:var(--display);font-weight:600;font-size:18px;margin:0;letter-spacing:-.01em;}
+.sect>.sub{color:var(--muted);font-size:13.5px;margin:4px 0 16px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-weight:600;font-size:14px;margin-bottom:6px;}
+.field input,.field select{width:100%;padding:11px 12px;border:1px solid var(--line);
+ border-radius:10px;font:inherit;font-size:15px;background:var(--bg);color:var(--ink);}
+.field input:focus,.field select:focus{outline:2px solid var(--pine-bright);outline-offset:1px;
+ border-color:var(--pine-bright);}
+.toggle{display:flex;align-items:center;gap:11px;margin-bottom:16px;cursor:pointer;font-size:14px;font-weight:500;}
+.toggle input{width:18px;height:18px;accent-color:var(--pine);flex:none;margin:0;}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:4px 0 10px;}
+.btn{background:var(--pine);color:#fbfaf6;border:0;border-radius:10px;padding:12px 22px;
+ font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
+.btn:hover{background:var(--pine-bright);}
+@media(prefers-color-scheme:dark){.btn{color:#0e120f;}}
+.btn.ghost{background:transparent;color:var(--pine-bright);border:1px solid var(--line);}
+.btn.ghost:hover{background:var(--surface);border-color:var(--pine-bright);}
+.foot{color:var(--muted);font-size:12.5px;margin-top:20px;max-width:54ch;}
+a{color:var(--pine-bright);}
+"""
+
+_SHIELD = ('<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">'
+           '<path d="M12 2 4 5v6c0 4.5 3.2 8.3 8 9.9 4.8-1.6 8-5.4 8-9.9V5l-8-3Z" '
+           'fill="var(--pine)"/><path d="m8.5 12 2.4 2.4L15.8 9.5" stroke="#fbfaf6" '
+           'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+
+
+def _shell(inner: str) -> str:
+    return (
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+        '<title>Accountability Monitor — Settings</title>'
+        '<link rel="preconnect" href="https://fonts.googleapis.com">'
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+        'family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">'
+        f'<style>{PAGE_CSS}</style></head><body><div class="wrap">{inner}</div></body></html>'
+    )
+
+
+def _field_row(key: str, label: str, kind: str, val) -> str:
+    lbl = html.escape(label)
+    if kind == "bool":
+        checked = " checked" if val else ""
+        return (f'<label class="toggle"><input type="checkbox" name="{key}" '
+                f'value="1"{checked}> {lbl}</label>')
+    if kind == "freq":
+        opts = "".join(
+            f'<option value="{o}"{" selected" if val == o else ""}>{o}</option>'
+            for o in ("daily", "weekly", "off")
+        )
+        return (f'<div class="field"><label>{lbl}</label>'
+                f'<select name="{key}">{opts}</select></div>')
+    t = {"password": "password", "number": "text", "email": "email",
+         "url": "url"}.get(kind, "text")
+    v = html.escape(str(val))
+    return (f'<div class="field"><label>{lbl}</label>'
+            f'<input type="{t}" name="{key}" value="{v}"></div>')
+
+
 def render(cfg: dict, saved: bool) -> str:
-    rows = []
-    for key, label, kind, default in FIELDS:
-        val = cfg.get(key, default)
-        lbl = html.escape(label)
-        if kind == "bool":
-            checked = "checked" if val else ""
-            field = (f'<input type="checkbox" name="{key}" value="1" {checked}>')
-            rows.append(f'<p><label>{field} {lbl}</label></p>')
-        elif kind == "freq":
-            opts = "".join(
-                f'<option value="{o}"{" selected" if val==o else ""}>{o}</option>'
-                for o in ("daily", "weekly", "off")
-            )
-            rows.append(f'<p><label>{lbl}<br><select name="{key}">{opts}</select></label></p>')
-        else:
-            t = {"password": "password", "number": "text", "email": "email",
-                 "url": "url"}.get(kind, "text")
-            v = html.escape(str(val))
-            rows.append(
-                f'<p><label>{lbl}<br>'
-                f'<input type="{t}" name="{key}" value="{v}" style="width:100%"></label></p>'
-            )
-    banner = ('<div class="ok">Saved. Restart the agent for changes to take '
-              'full effect.</div>' if saved else "")
-    return f"""<!doctype html><html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accountability Monitor — Settings</title>
-<style>
- body{{font:15px/1.5 -apple-system,system-ui,sans-serif;max-width:560px;
-   margin:0 auto;padding:24px 16px;color:#1a1a1a;background:#fff}}
- @media(prefers-color-scheme:dark){{body{{background:#131316;color:#e7e7e9}}
-   input,select{{background:#1d1d22;color:#e7e7e9;border-color:#333}}}}
- h1{{font-size:19px}} .mut{{color:#777}}
- input,select{{padding:9px 10px;border:1px solid #ccc;border-radius:8px;font:inherit}}
- button{{background:#2563eb;color:#fff;border:0;border-radius:8px;padding:11px 18px;
-   font:inherit;cursor:pointer}}
- .ok{{background:#dcfce7;color:#166534;padding:10px 12px;border-radius:8px;margin:10px 0}}
- .card{{border:1px solid #e4e4e7;border-radius:10px;padding:14px;margin:12px 0}}
-</style></head><body>
-<h1>Accountability Monitor</h1>
-<p class="mut">{html.escape(_status(cfg))}</p>
-{banner}
-<form method="post" action="/save" class="card">
-{''.join(rows)}
-<p><button type="submit">Save settings</button>
-   <a href="/test" style="margin-left:10px">Send test email</a></p>
-</form>
-<p class="mut">This page runs only on your computer. Nothing here is sent
-anywhere except the emails you configure.</p>
-</body></html>"""
+    sections = []
+    for title, sub, keys in GROUPS:
+        rows = []
+        for key in keys:
+            k, label, kind, default = _FIELD_BY_KEY[key]
+            rows.append(_field_row(k, label, kind, cfg.get(k, default)))
+        sections.append(
+            f'<div class="sect"><h2>{html.escape(title)}</h2>'
+            f'<p class="sub">{html.escape(sub)}</p>{"".join(rows)}</div>'
+        )
+    banner = (
+        '<div class="banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/>'
+        '</svg>Saved. Restart the app for changes to take full effect.</div>'
+    ) if saved else ""
+    inner = (
+        f'<div class="head">{_SHIELD}<h1>Accountability Monitor</h1></div>'
+        f'<span class="status"><span class="dot"></span>{html.escape(_status(cfg))}</span>'
+        f'{banner}'
+        f'<form method="post" action="/save">{"".join(sections)}'
+        f'<div class="actions"><button class="btn" type="submit">Save settings</button>'
+        f'<a class="btn ghost" href="/test">Send test email</a></div></form>'
+        f'<p class="foot">This page runs only on your computer. Nothing here is sent '
+        f'anywhere except the emails you set up.</p>'
+    )
+    return _shell(inner)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -197,11 +270,22 @@ class Handler(BaseHTTPRequestHandler):
                     msg = "Could not send: " + err
         except Exception as exc:
             msg = f"Could not send: {exc}"
-        self._send(
-            f'<!doctype html><meta charset="utf-8"><body style="font-family:'
-            f'system-ui;max-width:560px;margin:40px auto;padding:0 16px">'
-            f'<p>{html.escape(msg)}</p><p><a href="/">Back to settings</a></p>'
+        sent_ok = msg.startswith("Test email sent")
+        icon = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '
+                'stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+                if sent_ok else
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+                'stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/>'
+                '<path d="M12 8v5M12 16h.01"/></svg>')
+        tone = "ok-soft" if sent_ok else "amber-soft"
+        fg = "ok" if sent_ok else "amber"
+        inner = (
+            f'<div class="head">{_SHIELD}<h1>Accountability Monitor</h1></div>'
+            f'<div class="banner" style="background:var(--{tone});color:var(--{fg})">'
+            f'{icon}<span>{html.escape(msg)}</span></div>'
+            f'<div class="actions"><a class="btn" href="/">Back to settings</a></div>'
         )
+        self._send(_shell(inner))
 
     def log_message(self, *args):  # silence console noise
         pass
